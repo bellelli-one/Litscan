@@ -1,0 +1,46 @@
+<html lang="en">
+<head>
+    <title>RIP</title>
+    <link rel="stylesheet" href="/static/styles/book_style.css">
+    <link rel="stylesheet" href="/static/styles/index_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="detail-page">
+<header>
+    <h1>
+        <a href="/litscan" class="brand">L I T S C A N</a>
+    </h1>
+</header>
+<div class="container">
+    
+    <div class="card">
+        <img class="card-img" src="{{.book.ImageUrl}}" alt="">
+        <div class="card-content">
+            <h3 class="card-title">{{.book.Title}}</h3>
+            <p class="card-description">{{ .book.Description }}</p>
+            <div class="card-markers">
+                <div>
+                <strong>Средняя длина слова:</strong>
+                {{ printf "%.2f" .book.AvgWordLen }}
+                </div>
+                <div>
+                <strong>Лексическое разнообразие:</strong>
+                {{ printf "%.2f" .book.LexicalDiversity }}
+                </div>
+                <div>
+                <strong>Частота союзов:</strong>
+                {{ printf "%.3f" .book.ConjunctionFreq }}
+                </div>
+                <div>
+                <strong>Средняя длина предложения:</strong>
+                {{ printf "%.2f" .book.AvgSentenceLen }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <footer>
+    <div><p class="footer-text">©2025. Все права защищены.</p>></div>>
+</footer> -->
+</body>    
+</html>

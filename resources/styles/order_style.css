@@ -1,0 +1,129 @@
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.detail-page-2 .container {
+    display: flex;
+    flex-wrap: wrap;
+    /* justify-content: center; */
+    gap: 30px;
+    margin: 40px auto;
+    max-width: 1200px;
+    margin-left: 310px;
+}
+.detail-page-2 .card {
+  position: relative;
+  background-color: #f7f7f7;
+  border: 3px solid #ccc;
+  border-radius: 10px;
+  width:1200px;
+  height: 270px;  
+  display: flex;
+  flex-direction: row;  
+  padding: 20px;
+  box-sizing: border-box;
+  gap: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.detail-page-2 .card-img {
+    max-width: 300px;
+    max-height: 300px;
+    flex-shrink: 0;
+    width: 100%;
+    object-fit: cover;
+    /* object-position: center; */
+    margin-left: 50px;
+    margin-top: 15px;
+}
+.detail-page-2 .card-content {
+  display: flex;
+  flex-direction: column; 
+  margin-top: 1px;
+  /* justify-content: space-between; */
+}
+.detail-page-2 .btn-more {
+    position: absolute;
+    left: 600px; /* Размещаем слева от карточки */
+    top: 59%;
+    transform: translateY(-50%);
+    background-color: #CDC9C9;
+    color: 000000;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    /* box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); */
+    z-index: 10;
+    white-space: nowrap;
+}
+.editable-card {
+    /* display: flex; */
+    height: 70px;
+    min-width: 200px;
+    padding: 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    background: white;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #2c3e50;
+    resize: none;
+    overflow-y: auto;
+    margin-top: 70px;
+}
+
+
+.analysis {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+.analysis__markers {
+  flex: 1;
+  margin-left: 310px;
+  margin-right: 240px;
+}
+.analysis__title {
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+.markers-form .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
+.markers-form label {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.markers-form input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color .2s;
+  width: 250px;
+}
+.markers-form input:focus {
+  border-color: #007bff;
+}
+
+
+.analysis__result {
+  flex: 1;
+  margin-right: 330px;
+}
+.result-box {
+  min-height: 260px;
+  border: 3px solid #ccc;
+  border-radius: 6px;
+  background: #fafafa;
+  padding: 16px;
+  width: 600px;
+}
