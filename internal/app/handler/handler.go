@@ -6,6 +6,7 @@ import (
   "RIP/internal/app/repository"
   "net/http"
   "strconv"
+  "fmt"
 )
 
 type Handler struct {
@@ -22,11 +23,6 @@ func (h *Handler) GetBooks(ctx *gin.Context) {
 	var books []repository.Books
 	var err error
 	searchQuery := ctx.Query("query")
-	// addItem := ctx.Query("addItem")
-	// if addItem != ""{
-	// 	itemID, _ := strconv.Atoi(addItem)
-    //     h.Repository.AddToCart(itemID)  
-	// }
 	if searchQuery == "" {         
 		books, err = h.Repository.GetBooks()
 		if err != nil {
@@ -65,11 +61,6 @@ func (h *Handler) GetBook(ctx *gin.Context) {
 }
 
 func (h *Handler) GetOrder(ctx *gin.Context) {
-	// if h.Repository.GetCartCount() == 0 {
-    //     // Перенаправляем обратно с сообщением
-    //     ctx.Redirect(http.StatusFound, "/hello?error=empty_cart")
-    //     return
-    // }
 
 	idStr := ctx.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -82,9 +73,15 @@ func (h *Handler) GetOrder(ctx *gin.Context) {
 		logrus.Error(err)
 	}
 
+	BooksInArray, err := h.Repository.GetArrayOfBooks(id)
+	if err != nil {
+		logrus.Error(err)
+	}
 	BooksInApplication := order.Books
+	fmt.Println(BooksInArray)
 	ctx.HTML(http.StatusOK, "order.html", gin.H{
-		"Books": BooksInApplication,
+		"Books": BooksInArray,
+		"BooksInApplication": BooksInApplication,
 		"AvgWordLen": order.AvgWordLen,
 		"LexicalDiversity": order.LexicalDiversity,
 		"ConjunctionFreq": order.ConjunctionFreq,
@@ -92,32 +89,3 @@ func (h *Handler) GetOrder(ctx *gin.Context) {
 		"Result": order.Result,
 	})
 }
-
-// func (h *Handler) GetOrders(ctx *gin.Context) {
-// 	order, err := h.Repository.GetOrders()
-// 	if err != nil {
-// 		logrus.Error(err)
-// 	}
-// 	ctx.HTML(http.StatusOK, "index.html", gin.H{
-// 		"order": order,
-// 	})
-// }
-
-// func (h *Handler) GetApplicationComponents(ctx *gin.Context) {
-// 	idStr := ctx.Param("id")
-// 	id, err := strconv.Atoi(idStr)
-// 	total := 0
-// 	if err != nil {
-// 		logrus.Error(err)
-// 	}
-// 	items, _ := h.Repository.GetApplicationComponents(id)
-// 	for _, i := range items {
-// 		total += i.Price
-// 	}
-
-// 	ctx.HTML(http.StatusOK, "cart.html", gin.H{
-// 		"items":     items,
-// 		"total":     total,
-// 		"cartCount": len(items),
-// 	})
-// }

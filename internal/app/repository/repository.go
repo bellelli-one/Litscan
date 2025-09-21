@@ -28,7 +28,7 @@ type Books struct {
 }
 
 type BooksToApplication struct{
-	Book Books
+	BookId int
 	Description string
 }
 
@@ -43,7 +43,7 @@ type Application struct {
 
 var books = []Books{ 
     {
-      ID:    1,
+      ID:    0,
       Title: "Капитанская дочка",
 	  ImageUrl: "http://172.18.0.4:9000/test/kapitanskayadochka.jpeg",
 	  Description: `«Капитанская дочка» — это историческая повесть Александра Пушкина
@@ -56,7 +56,7 @@ var books = []Books{
 	  AvgSentenceLen: 9.89,
     },
     {
-      ID:    2,
+      ID:    1,
       Title: "Война и мир",
 	  ImageUrl: "http://172.18.0.4:9000/test/voinaimir.jpg",
 	  Description: `«Война и мир» — это масштабная эпопея Льва Толстого о судьбах
@@ -68,7 +68,7 @@ var books = []Books{
 	  AvgSentenceLen: 12.78,
     },
     {
-      ID:    3,
+      ID:    2,
       Title: "Грокаем алгоритмы",
 	  ImageUrl: "http://172.18.0.4:9000/test/grokaem.jpg",
 	  Description: `«Грокаем алгоритмы» — это иллюстрированное руководство Адитьи Бхаграва,
@@ -80,7 +80,7 @@ var books = []Books{
 	  AvgSentenceLen: 8.41,
     },
 	{
-      ID:    4,
+      ID:    3,
       Title: "Компьютерные сети",
 	  ImageUrl: "http://172.18.0.5:9000/test/tanenb.jpg",
 	  Description: `«Компьютерные сети» Эндрю Таненбаума — это книга, в которой последовательно
@@ -93,26 +93,26 @@ var books = []Books{
     },
 }
 
-var BooksInOrder = map[int]Application{
-	1: {
-		Books: []BooksToApplication{
-			{Book: books[0], Description: "Description 1"},
-			{Book: books[1], Description: "Description 2"},
-		},
-		AvgWordLen: 7.15,
-		LexicalDiversity: 0.22,
-		ConjunctionFreq: 0.055,
-		AvgSentenceLen: 11.89,
-		Result: "Результат",
-	},
-}
-
 func (r *Repository) GetBooks() ([]Books, error) {
   if len(books) == 0 {
     return nil, fmt.Errorf("массив пустой")
   }
 
   return books, nil
+}
+
+var BooksInOrder = map[int]Application{
+	1: {
+		Books: []BooksToApplication{
+			{BookId: 0, Description: "Description 1"},
+			{BookId: 1, Description: "Description 2"},
+		},	
+		AvgWordLen: 7.15,
+		LexicalDiversity: 0.22,
+		ConjunctionFreq: 0.055,
+		AvgSentenceLen: 11.89,
+		Result: "Результат",
+	},
 }
 
 func (r *Repository) GetBook(id int) (Books, error) {
@@ -145,4 +145,16 @@ func (r *Repository) GetBooksByTitle(title string) ([]Books, error) {
 
 func (r *Repository) GetBooksInOrder(id int) (Application, error) {
 	return BooksInOrder[id], nil
+}
+
+func (r *Repository) GetArrayOfBooks(id int) ([]Books, error) {
+    var result []Books
+	order, err := r.GetBooksInOrder(id)
+	if err != nil {
+		return nil, err
+	}
+	for _, bookRef := range order.Books {
+        result = append(result, books[bookRef.BookId])
+	}
+    return result, nil
 }

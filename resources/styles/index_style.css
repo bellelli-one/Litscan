@@ -1,6 +1,6 @@
 body {
     background-color: #EEECEC;
-    font-family: 'Inter', sans-serif;
+    /* font-family: 'Inter', sans-serif; */
 }
 header {
     display: flex;
@@ -57,7 +57,7 @@ header {
     justify-content: center;
     gap: 130px;
     margin: 40px auto;
-    max-width: 1200px;
+    max-width: 1300px;
 }
 .card {
     background-color: #f7f7f7;

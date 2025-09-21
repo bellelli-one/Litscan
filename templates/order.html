@@ -69,41 +69,54 @@
         </div>
     </div>
 </section>
+<div class="services-header">
+    <div class="header-title">Название</div>
+    <div class="header-word">Дл. слова</div>
+    <div class="header-lex">Лекс. разн.</div>
+    <div class="header-conj">Союзы</div>
+    <div class="header-sent">Дл. предл.</div>
+    <div class="header-desc">Описание</div>
+</div>
 <section class="works">
     <div class="container">
-        {{ range .Books }}
+        {{ range $Book := .Books }}
+        {{ range $param := $.BooksInApplication }}
+        {{ if eq $param.BookId $Book.ID }}
         <div class="card">
-            <img class="card-img" src="{{.Book.ImageUrl}}" alt="">
+            <img class="card-img" src="{{$Book.ImageUrl}}" alt="">
+            <h3 class="card-title">{{$Book.Title}}</h3>
             <div class="card-content">
-                <h3 class="card-title">{{.Book.Title}}</h3>
-                <p class="card-description">{{ .Book.Description }}</p>
-                <div class="card-markers">
+                <!-- <h3 class="card-title">{{$Book.Title}}</h3> -->
+                <!-- <p class="card-description">{{ $Book.Description }}</p> -->
+                <!-- <div class="card-markers"> -->
                     <div>
-                    <strong>Средняя длина слова:</strong>
-                    {{ printf "%.2f" .Book.AvgWordLen }}
+                    <!-- <strong>Средняя длина слова:</strong> -->
+                    {{ printf "%.2f" $Book.AvgWordLen }}
                     </div>
                     <div>
-                    <strong>Лексическое разнообразие:</strong>
-                    {{ printf "%.2f" .Book.LexicalDiversity }}
+                    <!-- <strong>Лексическое разнообразие:</strong> -->
+                    {{ printf "%.2f" $Book.LexicalDiversity }}
                     </div>
                     <div>
-                    <strong>Частота союзов:</strong>
-                    {{ printf "%.3f" .Book.ConjunctionFreq }}
-                    </div>
+                    <!-- <strong>Частота союзов:</strong> -->
+                    {{ printf "%.3f" $Book.ConjunctionFreq }}
+                    </div>  
                     <div>
-                    <strong>Средняя длина предложения:</strong>
-                    {{ printf "%.2f" .Book.AvgSentenceLen }}
+                    <!-- <strong>Средняя длина предложения:</strong> -->
+                    {{ printf "%.2f" $Book.AvgSentenceLen }}
                     </div>
-                </div>
+                <!-- </div> -->
             </div>
-            <a class="btn btn-more" href="/book/{{ .Book.ID }}">Подробнее...</a>
+            <a class="btn btn-more" href="/book/{{ $Book.ID }}">Подробнее...</a>
             <div 
                 class="editable-card" 
                 contenteditable="true" 
                 placeholder="Введите текст..."
-                >{{.Description}}
+                >{{ $param.Description }}
             </div>
         </div>
+        {{ end }}
+        {{ end }}
         {{ end }}
     </div>
 </section>
