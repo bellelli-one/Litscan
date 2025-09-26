@@ -16,13 +16,13 @@ body {
   background-color: #f7f7f7;
   border: 3px solid #ccc;
   border-radius: 10px;
-  width:1200px;
+  width:1400px;
   height: 270px;  
   display: flex;
   flex-direction: row;  
   padding: 20px;
   box-sizing: border-box;
-  gap: 20px;
+  gap: 40px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .detail-page-2 .card-img {
@@ -33,20 +33,20 @@ body {
     object-fit: cover;
     /* object-position: center; */
     margin-left: 50px;
-    margin-top: 15px;
+    margin-top: 10px;
 }
 .detail-page-2 .card-content {
   display: flex;
   flex-direction: row; 
   margin-top: 100px;
   width: 600px;
-  gap: 10px;
+  gap: 60px;
   /* justify-content: space-between; */
 }
 .detail-page-2 .btn-more {
     position: absolute;
     left: 600px; /* Размещаем слева от карточки */
-    top: 59%;
+    top: 70%;
     transform: translateY(-50%);
     background-color: #CDC9C9;
     color: 000000;
@@ -62,6 +62,7 @@ body {
     white-space: nowrap;
 }
 .detail-page-2 .card-title {
+  margin-top: 80px;
   width: 280px;
 }
 .editable-card {
