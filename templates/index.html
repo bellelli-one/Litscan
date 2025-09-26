@@ -1,0 +1,67 @@
+<html lang="en">
+<head>
+    <title>RIP</title>
+    <link rel="stylesheet" href="/static/styles/index_style.css">
+    <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> -->
+</head>
+
+<body>
+<header>
+    <h1>
+        <a href="/litscan" class="brand">L I T S C A N</a>
+    </h1>
+</header>
+<form action="/litscan" method="GET" class="search-form">
+    <input type="text" name="query" placeholder="Введите произведение" value="{{ .query }}">
+
+</form>
+<div class="container">
+    {{ range .books }}
+    <div class="card">
+        <img class="card-img" src="{{.ImageUrl}}" alt="">
+        <div class="card-content">
+            <h3 class="card-title">{{.Title}}</h3>
+            <p class="card-description">{{ .Description }}</p>
+            <div class="card-markers">
+                <div>
+                <strong>Средняя длина слова:</strong>
+                {{ printf "%.2f" .AvgWordLen }}
+                </div>
+                <div>
+                <strong>Лексическое разнообразие:</strong>
+                {{ printf "%.2f" .LexicalDiversity }}
+                </div>
+                <div>
+                <strong>Частота союзов:</strong>
+                {{ printf "%.3f" .ConjunctionFreq }}
+                </div>
+                <div>
+                <strong>Средняя длина предложения:</strong>
+                {{ printf "%.2f" .AvgSentenceLen }}
+                </div>
+            </div>
+            <div class="card-buttons">
+                <!-- <a href="/hello?addItem={{ .ID }}&query={{$.query}}">
+                    <button class="btn btn-add" data-id="{{ .ID }}">Добавить</button>
+                </a> -->
+                <a class="btn btn-more" href="/book/{{ .ID }}">Подробнее...</a>
+            </div>
+        </div>
+    </div>
+    {{ end }}
+</div>
+
+<a href="/order/1" class="book-counter">
+    <img src="http://172.18.0.4:9000/test/book.jpg" class="img-btn">
+    <div class="counter-wrapper">
+        <span class="count-number">
+            {{ if .count }}{{ .count }}{{ else }}0{{ end }}
+        </span>
+    </div>
+</a>
+
+<!-- <footer>
+    <div><p class="footer-text">©2025. Все права защищены.</p>></div>>
+</footer> -->
+</body>
+</html>

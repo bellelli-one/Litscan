@@ -1,0 +1,186 @@
+body {
+    background-color: #EEECEC;
+    /* font-family: 'Inter', sans-serif; */
+}
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.brand {
+    font-family: 'Josefin Sans', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin-left: 100px;
+    color: #111;
+}   
+
+.search-form {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 3px solid #ccc;
+    border-radius: 8px;
+    height: 40px;
+    width: 1000px;
+    overflow: hidden;
+    /* margin-right: 200px; */
+    margin-left: 400px;
+    margin-top: 40px;
+}
+.search-form input {
+    border: none;
+    outline: none;
+    padding: 8px 12px;
+    font-size: 14px;
+    width: 220px;
+}
+.search-form button {
+    border: none;
+    background: #111;
+    color: #fff;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 130px;
+    margin: 40px auto;
+    max-width: 1300px;
+}
+.card {
+    background-color: #f7f7f7;
+    border: 3px solid #ccc;
+    border-radius: 10px;
+    width: 530px;
+    height: 530px;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    gap: 20px;
+    flex-direction: column;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.card-img {
+    max-width: 300px;
+    max-height: 300px;
+    flex-shrink: 0;
+    width: 100%;
+    object-fit: cover;
+    /* object-position: center; */
+    margin-left: 90px;
+}
+.card-title {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  text-align: center;
+}
+.card-buttons {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between;
+}
+
+
+.btn {
+  padding: 12px 40px;
+  border: none;
+  border-radius: 7px;
+  text-decoration: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: 30px;
+  margin-left: 150px;
+  margin-right: 50px;
+}
+.btn-add {
+  background-color: #007bff;
+}
+.btn-more {
+  display: block;
+  background-color: #CDC9C9;
+  color: #000000;
+  
+}
+
+.img-btn {
+    width: 70px;          /* маленькая ширина */
+    height: 70px;         /* маленькая высота */
+    cursor: pointer;      /* курсор-указатель */
+    transition: all 0.3s ease; /* плавные анимации */
+    object-fit: cover;    /* сохраняет пропорции */
+    border-radius: 6px;   /* скругленные углы */
+}
+
+footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.footer-text {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  font-size: 20px;
+  color: #fff;
+  text-align: center; /* дополнительное центрирование текста */
+}
+
+
+.book-counter {
+    position: fixed;
+    bottom: 20px; 
+    left: 20px;
+    z-index: 1000; 
+    /* position: relative; */
+    display: inline-block;
+    text-decoration: none;
+}
+.counter-wrapper {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    background: #3498db;
+    color: white;
+    border-radius: 15px;
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+    border: 3px solid #f8f9fa;
+    transition: all 0.3s ease;
+}
+.book-counter:hover .counter-wrapper {
+    background: #2980b9;
+    transform: scale(1.1);
+}
+
+
+.disabled-link {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.5;
+}
