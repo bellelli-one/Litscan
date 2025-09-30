@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
     <title>RIP</title>
-    <link rel="stylesheet" href="/static/styles/index_style.css">
+    <link rel="stylesheet" href="/resources/styles/index_style.css">
     <!-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"> -->
 </head>
 
@@ -12,16 +12,16 @@
     </h1>
 </header>
 <form action="/litscan" method="GET" class="search-form">
-    <input type="text" name="query" placeholder="Введите произведение" value="{{ .query }}">
+    <input type="text" name="searchingBooks" placeholder="Введите произведение" value="{{ .booksSearch }}">
 
 </form>
 <div class="container">
     {{ range .books }}
     <div class="card">
-        <img class="card-img" src="{{.ImageUrl}}" alt="">
+        <img class="card-img" src="{{.Image}}" alt="">
         <div class="card-content">
             <h3 class="card-title">{{.Title}}</h3>
-            <p class="card-description">{{ .Description }}</p>
+            <p class="card-description">{{ .Text }}</p>
             <div class="card-markers">
                 <div>
                 <strong>Средняя длина слова:</strong>
@@ -41,9 +41,9 @@
                 </div>
             </div>
             <div class="card-buttons">
-                <!-- <a href="/hello?addItem={{ .ID }}&query={{$.query}}">
-                    <button class="btn btn-add" data-id="{{ .ID }}">Добавить</button>
-                </a> -->
+                <form action="/order/add/book/{{ .ID }}" method="POST">
+                    <button class="btn btn-add" type="submit">Добавить</button>
+                </form>
                 <a class="btn btn-more" href="/book/{{ .ID }}">Подробнее...</a>
             </div>
         </div>
@@ -51,15 +51,21 @@
     {{ end }}
 </div>
 
-<a href="/order/1" class="book-counter">
-    <img src="http://172.18.0.4:9000/test/book.jpg" class="img-btn">
-    <div class="counter-wrapper">
-        <span class="count-number">
-            {{ if .count }}{{ .count }}{{ else }}0{{ end }}
-        </span>
+{{ if gt .applCount 0 }}
+    <a href="/order/{{ .applID }}" class="book-counter">
+        <img src="http://172.18.0.4:9000/test/book.jpg" class="img-btn">
+        <div class="counter-wrapper">
+            <span class="count-number">{{ .applCount }}</span>
+        </div>
+    </a>
+{{ else }}
+    <div class="book-counter" style="cursor: not-allowed;">
+        <img src="http://172.18.0.4:9000/test/book.jpg" class="img-btn" style="opacity: 0.5;">
+        <div class="counter-wrapper">
+            <span class="count-number">0</span>
+        </div>
     </div>
-</a>
-
+{{ end }}
 <!-- <footer>
     <div><p class="footer-text">©2025. Все права защищены.</p>></div>>
 </footer> -->

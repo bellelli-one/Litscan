@@ -97,6 +97,7 @@ header {
 
 .btn {
   padding: 12px 40px;
+  flex: 1;
   border: none;
   border-radius: 7px;
   text-decoration: none;
@@ -104,17 +105,19 @@ header {
   cursor: pointer;
   font-size: 0.9rem;
   margin-top: 30px;
-  margin-left: 150px;
+  margin-left: 50px;
   margin-right: 50px;
 }
 .btn-add {
+  display: block;
   background-color: #007bff;
 }
 .btn-more {
-  display: block;
+  /* display: block; */
   background-color: #CDC9C9;
   color: #000000;
-  
+  margin-bottom: 70px;
+  margin-left:40px;
 }
 
 .img-btn {

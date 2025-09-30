@@ -167,3 +167,23 @@ body {
 .header-conj { width: 80px; }
 .header-sent { width: 8 0px; }
 .header-desc { width: 180px; }
+
+
+.appl-delete-button {
+    margin-top: 30px;
+    text-align: center; /* выравнивание по центру */
+}
+
+.card-button {
+    padding: 12px 40px;
+    border: none;
+    border-radius: 7px;
+    text-decoration: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    background-color: #CDC9C9; /* красный цвет для удаления */
+    transition: background-color 0.3s ease;
+    display: inline-block;
+    text-align: center;
+}

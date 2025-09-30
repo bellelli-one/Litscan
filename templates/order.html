@@ -1,8 +1,8 @@
 <html lang="en">
 <head>
     <title>RIP</title>
-    <link rel="stylesheet" href="/static/styles/order_style.css">
-    <link rel="stylesheet" href="/static/styles/index_style.css">
+    <link rel="stylesheet" href="/resources/styles/order_style.css">
+    <link rel="stylesheet" href="/resources/styles/index_style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="detail-page-2">
@@ -19,10 +19,7 @@
                 <label for="avg-word-len">Средняя длина слова</label>
                 <input
                     type="number"
-                    id="avg-word-len"
-                    value="{{.AvgWordLen}}"
                     name="avgWordLen"
-                    step="0.01"
                     placeholder="например, 5.15"
                 />
             </div>
@@ -30,33 +27,24 @@
                 <label for="lexical-diversity">Лексическое разнообразие</label>
                 <input
                     type="number"
-                    id="lexical-diversity"
-                    value="{{.LexicalDiversity}}"
                     name="lexicalDiversity"
-                    step="0.01"
                     placeholder="например, 0.28"
                 />
             </div>
             <div class="form-group">
                 <label for="conj-frequency">Частота союзов</label>
                 <input
-                type="number"
-                id="conj-frequency"
-                value="{{.ConjunctionFreq}}"
-                name="conjunctionFreq"
-                step="0.001"
-                placeholder="например, 0.075"
+                    type="number"
+                    name="conjunctionFreq"
+                    placeholder="например, 0.075"
                 />
             </div>
             <div class="form-group">
                 <label for="avg-sent-len">Средняя длина предложения</label>
                 <input
-                type="number"
-                id="avg-sent-len"
-                value="{{.AvgSentenceLen}}"
-                name="avgSentenceLen"
-                step="0.01"
-                placeholder="например, 9.89"
+                    type="number"
+                    name="avgSentenceLen"
+                    placeholder="например, 9.89"
                 />
             </div>
         </form>
@@ -64,8 +52,7 @@
     <div class="analysis__result">
         <h2 class="analysis__title">Результат</h2>
         <div class="result-box">
-            <label><span class="result">{{.Result}}</label>
-          <!-- сюда будет вывод анализа -->
+            <label><span class="result"></span></label>
         </div>
     </div>
 </section>
@@ -79,50 +66,40 @@
 </div>
 <section class="works">
     <div class="container">
-        {{ range $Book := .Books }}
-        {{ range $param := $.BooksInApplication }}
-        {{ if eq $param.BookId $Book.ID }}
+        {{range .BooksLink}}
         <div class="card">
-            <img class="card-img" src="{{$Book.ImageUrl}}" alt="">
-            <h3 class="card-title">{{$Book.Title}}</h3>
+            <img class="card-img" src="{{.Book.Image}}" alt="">
+            <h3 class="card-title">{{.Book.Title}}</h3>
             <div class="card-content">
-                <!-- <h3 class="card-title">{{$Book.Title}}</h3> -->
-                <!-- <p class="card-description">{{ $Book.Description }}</p> -->
-                <!-- <div class="card-markers"> -->
                     <div>
-                    <!-- <strong>Средняя длина слова:</strong> -->
-                    {{ printf "%.2f" $Book.AvgWordLen }}
+                    {{ printf "%.2f" .Book.AvgWordLen }}
                     </div>
                     <div>
-                    <!-- <strong>Лексическое разнообразие:</strong> -->
-                    {{ printf "%.2f" $Book.LexicalDiversity }}
+                    {{ printf "%.2f" .Book.LexicalDiversity }}
                     </div>
                     <div>
-                    <!-- <strong>Частота союзов:</strong> -->
-                    {{ printf "%.3f" $Book.ConjunctionFreq }}
+                    {{ printf "%.3f" .Book.ConjunctionFreq }}
                     </div>  
                     <div>
-                    <!-- <strong>Средняя длина предложения:</strong> -->
-                    {{ printf "%.2f" $Book.AvgSentenceLen }}
+                    {{ printf "%.2f" .Book.AvgSentenceLen }}
                     </div>
-                <!-- </div> -->
             </div>
-            <a class="btn btn-more" href="/book/{{ $Book.ID }}">Подробнее...</a>
+            <a class="btn btn-more" href="/book/{{ .Book.ID }}">Подробнее...</a>
             <div 
                 class="editable-card" 
-                contenteditable="true" 
+                contenteditable="true"    
                 placeholder="Введите текст..."
-                >{{ $param.Description }}
+                >
             </div>
         </div>
         {{ end }}
-        {{ end }}
-        {{ end }}
     </div>
 </section>
+<div class="appl-delete-button">
+    <form action="/order/{{ .ID }}/delete" method="POST">
+        <button class="card-button" type="submit">Удалить заявку</button>
+    </form>
+</div>
 
-<!-- <footer>
-    <div><p class="footer-text">©2025. Все права защищены.</p>></div>>
-</footer> -->
 </body>    
 </html>

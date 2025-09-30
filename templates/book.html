@@ -1,8 +1,8 @@
 <html lang="en">
 <head>
     <title>RIP</title>
-    <link rel="stylesheet" href="/static/styles/book_style.css">
-    <link rel="stylesheet" href="/static/styles/index_style.css">
+    <link rel="stylesheet" href="/resources/styles/book_style.css">
+    <link rel="stylesheet" href="/resources/styles/index_style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="detail-page">
@@ -14,26 +14,26 @@
 <div class="container">
     
     <div class="card">
-        <img class="card-img" src="{{.book.ImageUrl}}" alt="">
+        <img class="card-img" src="{{.Image}}" alt="">
         <div class="card-content">
-            <h3 class="card-title">{{.book.Title}}</h3>
-            <p class="card-description">{{ .book.Description }}</p>
+            <h3 class="card-title">{{.Title}}</h3>
+            <p class="card-description">{{ .Text }}</p>
             <div class="card-markers">
                 <div>
                 <strong>Средняя длина слова:</strong>
-                {{ printf "%.2f" .book.AvgWordLen }}
+                {{ printf "%.2f" .AvgWordLen }}
                 </div>
                 <div>
                 <strong>Лексическое разнообразие:</strong>
-                {{ printf "%.2f" .book.LexicalDiversity }}
+                {{ printf "%.2f" .LexicalDiversity }}
                 </div>
                 <div>
                 <strong>Частота союзов:</strong>
-                {{ printf "%.3f" .book.ConjunctionFreq }}
+                {{ printf "%.3f" .ConjunctionFreq }}
                 </div>
                 <div>
                 <strong>Средняя длина предложения:</strong>
-                {{ printf "%.2f" .book.AvgSentenceLen }}
+                {{ printf "%.2f" .AvgSentenceLen }}
                 </div>
             </div>
         </div>
