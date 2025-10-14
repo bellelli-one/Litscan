@@ -15,9 +15,10 @@ func main() {
 	if err != nil {
 		panic("failed to connect database")
 	}
+
 	err = db.AutoMigrate(
 		&ds.Books{},
-		&ds.Application{},
+		&ds.AnalyseBooks{},
 		&ds.BookToAppl{},
 		&ds.Users{},
 	)

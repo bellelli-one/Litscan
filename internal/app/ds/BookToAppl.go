@@ -8,6 +8,6 @@ type BookToAppl struct {
 
 	// --- СВЯЗИ ---
 	// Отношение "принадлежит к" для каждой из связанных таблиц.
-	Appl Application `gorm:"foreignKey:ApplID"`
-	Book Books       `gorm:"foreignKey:BookID"`
+	Appl AnalyseBooks `gorm:"foreignKey:ApplID"`
+	Book Books        `gorm:"foreignKey:BookID"`
 }

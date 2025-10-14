@@ -7,5 +7,5 @@ type Users struct {
 	Moderator bool   `gorm:"column:moderator;not null"`
 	// --- СВЯЗИ ---
 	// Отношение "один-ко-многим": один пользователь может иметь много поисковых сессий.
-	Applications []Application `gorm:"foreignKey:CreatorID"`
+	AnalyseBooks []AnalyseBooks `gorm:"foreignKey:CreatorID"`
 }

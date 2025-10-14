@@ -6,67 +6,200 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/sirupsen/logrus"
+	// "github.com/sirupsen/logrus"
 )
 
-func (h *Handler) GetAllBooks(ctx *gin.Context) {
-	var books []ds.Books
-	var err error
+// GET /api/books - список книг с фильтрацией
+func (h *Handler) GetBooks(c *gin.Context) {
+	title := c.Query("title")
 
-	searchingBooks := ctx.Query("searchingBooks")
-	if searchingBooks == "" {
-		books, err = h.Repository.GetAllBooks()
-	} else {
-		books, err = h.Repository.SearchBooksByName(searchingBooks)
-	}
-
+	books, total, err := h.Repository.BooksList(title)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		logrus.Error(err)
+		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
 	}
 
-	draftAppl, err := h.Repository.GetDraftAppl(2)
-	var applID uint = 0
-	var applCount int = 0
-
-	if err == nil && draftAppl != nil {
-		fullAppl, err := h.Repository.GetApplWithBooks(draftAppl.ID)
-		if err == nil {
-			applID = fullAppl.ID
-			applCount = len(fullAppl.BooksLink)
-		}
+	var bookDTOs []ds.BookDTO
+	for _, b := range books {
+		bookDTOs = append(bookDTOs, ds.BookDTO{
+			ID:               b.ID,
+			Title:            b.Title,
+			Text:             b.Text,
+			Image:            b.Image,
+			AvgWordLen:       b.AvgWordLen,
+			LexicalDiversity: b.LexicalDiversity,
+			ConjunctionFreq:  b.ConjunctionFreq,
+			AvgSentenceLen:   b.AvgSentenceLen,
+			Status:           b.Status,
+		})
 	}
 
-	ctx.HTML(http.StatusOK, "index.html", gin.H{
-		"books":       books,
-		"booksSearch": searchingBooks,
-		"applID":      applID,
-		"applCount":   applCount,
+	c.JSON(http.StatusOK, ds.PaginatedResponse{
+		Items: bookDTOs,
+		Total: total,
 	})
 }
 
-func (h *Handler) GetBookByID(ctx *gin.Context) {
-	strId := ctx.Param("id")
-	id, err := strconv.Atoi(strId)
+// GET /api/books/:id - одна книга
+func (h *Handler) GetBook(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		logrus.Error(err)
+		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
 	book, err := h.Repository.GetBookByID(id)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
-		logrus.Error(err)
+		h.errorHandler(c, http.StatusNotFound, err)
 		return
 	}
 
-	ctx.HTML(http.StatusOK, "book.html", book)
+	bookDTO := ds.BookDTO{
+		ID:               book.ID,
+		Title:            book.Title,
+		Text:             book.Text,
+		Image:            book.Image,
+		AvgWordLen:       book.AvgWordLen,
+		LexicalDiversity: book.LexicalDiversity,
+		ConjunctionFreq:  book.ConjunctionFreq,
+		AvgSentenceLen:   book.AvgSentenceLen,
+		Status:           book.Status,
+	}
+
+	c.JSON(http.StatusOK, bookDTO)
+}
+
+// POST /api/books - создание книги
+func (h *Handler) CreateBook(c *gin.Context) {
+	var req ds.BookCreateRequest
+	if err := c.BindJSON(&req); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	statusValue := false
+
+	book := ds.Books{
+		Title:            req.Title,
+		Text:             req.Text,
+		Image:            req.Image,
+		AvgWordLen:       req.AvgWordLen,
+		LexicalDiversity: req.LexicalDiversity,
+		ConjunctionFreq:  req.ConjunctionFreq,
+		AvgSentenceLen:   req.AvgSentenceLen,
+		Status:           &statusValue,
+	}
+
+	if err := h.Repository.CreateBook(&book); err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	bookDTO := ds.BookDTO{
+		ID:               book.ID,
+		Title:            book.Title,
+		Text:             book.Text,
+		Image:            book.Image,
+		AvgWordLen:       book.AvgWordLen,
+		LexicalDiversity: book.LexicalDiversity,
+		ConjunctionFreq:  book.ConjunctionFreq,
+		AvgSentenceLen:   book.AvgSentenceLen,
+		Status:           book.Status,
+	}
+
+	c.JSON(http.StatusCreated, bookDTO)
+}
+
+// PUT /api/books/:id - обновление книги
+func (h *Handler) UpdateBook(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	var req ds.BookUpdateRequest
+	if err := c.BindJSON(&req); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	book, err := h.Repository.UpdateBook(uint(id), req)
+	if err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	bookDTO := ds.BookDTO{
+		ID:               book.ID,
+		Title:            book.Title,
+		Text:             book.Text,
+		Image:            book.Image,
+		AvgWordLen:       book.AvgWordLen,
+		LexicalDiversity: book.LexicalDiversity,
+		ConjunctionFreq:  book.ConjunctionFreq,
+		AvgSentenceLen:   book.AvgSentenceLen,
+		Status:           book.Status,
+	}
+
+	c.JSON(http.StatusOK, bookDTO)
+}
+
+// DELETE /api/books/:id - удаление книги
+func (h *Handler) DeleteBook(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.Repository.DeleteBook(uint(id)); err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{
+		"message": "Книга удалена",
+	})
+}
+
+// POST /api/analyse-books/draft/books/:book_id - добавление книги в черновик
+func (h *Handler) AddBookToDraft(c *gin.Context) {
+	bookID, err := strconv.Atoi(c.Param("book_id"))
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.Repository.AddBookToDraft(hardcodedUserID, uint(bookID)); err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "Черновик создан. Книга добавлена в черновик.",
+	})
+}
+
+// POST /api/books/:id/image - загрузка изображения книги
+func (h *Handler) UploadBookImage(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	imageURL, err := h.Repository.UploadBookImage(uint(id), file)
+	if err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"image": imageURL})
 }

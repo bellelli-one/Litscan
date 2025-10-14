@@ -1,95 +1,3 @@
-// package handler
-
-// import (
-//   "github.com/gin-gonic/gin"
-//   "github.com/sirupsen/logrus"
-//   "RIP/internal/app/repository"
-//   "net/http"
-//   "strconv"
-//   "fmt"
-// )
-
-// type Handler struct {
-//   Repository *repository.Repository
-// }
-
-// func NewHandler(r *repository.Repository) *Handler {
-//   return &Handler{
-//     Repository: r,
-//   }
-// }
-
-// func (h *Handler) GetBooks(ctx *gin.Context) {
-// 	var books []repository.Books
-// 	var err error
-// 	searchQuery := ctx.Query("query")
-// 	if searchQuery == "" {         
-// 		books, err = h.Repository.GetBooks()
-// 		if err != nil {
-// 			logrus.Error(err)
-// 		}
-// 	} else {
-// 		books, err = h.Repository.GetBooksByTitle(searchQuery)
-// 		if err != nil {
-// 			logrus.Error(err)
-// 		}
-// 	}
-// 	items, _ := h.Repository.GetBooksInOrder(1)
-// 	count := len(items.Books)
-// 	ctx.HTML(http.StatusOK, "index.html", gin.H{
-// 		"books": books,
-// 		"query":  searchQuery,
-// 		"count": count,
-// 	})
-// }
-
-// func (h *Handler) GetBook(ctx *gin.Context) {
-// 	idStr := ctx.Param("id")
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		logrus.Error(err)
-// 	}
-
-// 	book, err := h.Repository.GetBook(id)
-// 	if err != nil {
-// 		logrus.Error(err)
-// 	}
-
-// 	ctx.HTML(http.StatusOK, "book.html", gin.H{
-// 		"book": book,
-// 	})
-// }
-
-// func (h *Handler) GetOrder(ctx *gin.Context) {
-
-// 	idStr := ctx.Param("id")
-// 	id, err := strconv.Atoi(idStr)
-// 	if err != nil {
-// 		logrus.Error(err)
-// 	}
-
-// 	order, err := h.Repository.GetBooksInOrder(id)
-// 	if err != nil {
-// 		logrus.Error(err)
-// 	}
-
-// 	BooksInArray, err := h.Repository.GetArrayOfBooks(id)
-// 	if err != nil {
-// 		logrus.Error(err)
-// 	}
-// 	BooksInApplication := order.Books
-// 	fmt.Println(BooksInArray)
-// 	ctx.HTML(http.StatusOK, "order.html", gin.H{
-// 		"Books": BooksInArray,
-// 		"BooksInApplication": BooksInApplication,
-// 		"AvgWordLen": order.AvgWordLen,
-// 		"LexicalDiversity": order.LexicalDiversity,
-// 		"ConjunctionFreq": order.ConjunctionFreq,
-// 		"AvgSentenceLen": order.AvgSentenceLen,
-// 		"Result": order.Result,
-// 	})
-// }
-
 package handler
 
 import (
@@ -98,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
+
+const hardcodedUserID = 2
 
 type Handler struct {
 	Repository *repository.Repository
@@ -109,18 +19,35 @@ func NewHandler(r *repository.Repository) *Handler {
 	}
 }
 
-func (h *Handler) RegisterHandler(router *gin.Engine) {
-	router.GET("/litscan", h.GetAllBooks)
-	router.GET("/book/:id", h.GetBookByID)
-	router.GET("/order/:appl_id", h.GetAppl)
-	router.POST("/order/add/book/:book_id", h.AddBookToAppl)
-	router.POST("/order/:appl_id/delete", h.DeleteAppl)
+func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
+	// Домен книг
+	r.GET("/books", h.GetBooks)
+	r.GET("/books/:id", h.GetBook)
+	r.POST("/books", h.CreateBook)
+	r.PUT("/books/:id", h.UpdateBook)
+	r.DELETE("/books/:id", h.DeleteBook)
+	r.POST("/analyse-books/draft/books/:book_id", h.AddBookToDraft)
+	r.POST("/books/:id/image", h.UploadBookImage)
 
-}
+	// Домен заявок (AnalyseBooks)
+	r.GET("/analyse-books/cart", h.GetCartBadge)
+	r.GET("/analyse-books", h.ListAnalyseBooks)
+	r.GET("/analyse-books/:id", h.GetAnalyseBooks)
+	r.PUT("/analyse-books/:id", h.UpdateAnalyseBooks)
+	r.PUT("/analyse-books/:id/form", h.FormAnalyseBooks)
+	r.PUT("/analyse-books/:id/resolve", h.ResolveAnalyseBooks)
+	r.DELETE("/analyse-books/:id", h.DeleteAnalyseBooks)
 
-func (h *Handler) RegisterStatic(router *gin.Engine) {
-	router.LoadHTMLGlob("templates/*")
-	router.Static("/resources", "./resources")
+	// Домен м-м (связь заявок и книг)
+	r.DELETE("/analyse-books/:id/books/:book_id", h.RemoveBookFromAnalyseBooks)
+	r.PUT("/analyse-books/:id/books/:book_id", h.UpdateBookToApplication)
+
+	// Домен пользователь
+	r.POST("/users", h.Register)
+	r.GET("/users/:id", h.GetUserData)
+	r.PUT("/users/:id", h.UpdateUserData)
+	r.POST("/auth/login", h.Login)
+	r.POST("/auth/logout", h.Logout)
 }
 
 func (h *Handler) errorHandler(ctx *gin.Context, errorStatusCode int, err error) {
