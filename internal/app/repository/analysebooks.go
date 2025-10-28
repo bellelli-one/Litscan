@@ -37,11 +37,15 @@ func (r *Repository) GetAnalyseBooksWithBooks(applID uint) (*ds.AnalyseBooks, er
 }
 
 // GET /api/analysebooks - список заявок с фильтрацией
-func (r *Repository) AnalyseBooksListFiltered(status, from, to string) ([]ds.AnalyseBooksDTO, error) {
+func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, status, from, to string) ([]ds.AnalyseBooksDTO, error) {
 	var appList []ds.AnalyseBooks
 	query := r.db.Preload("Creator").Preload("Moderator")
 
 	query = query.Where("status != ? AND status != ?", ds.StatusDeleted, ds.StatusDraft)
+
+	if !isModerator {
+		query = query.Where("creator_id = ?", userID)
+	}
 
 	if status != "" {
 		if statusInt, err := strconv.Atoi(status); err == nil {
@@ -79,6 +83,7 @@ func (r *Repository) AnalyseBooksListFiltered(status, from, to string) ([]ds.Ana
 			LexicalDiversity: app.LexicalDiversity,
 			ConjunctionFreq:  app.ConjunctionFreq,
 			AvgSentenceLen:   app.AvgSentenceLen,
+			Response:         app.Response,
 		}
 
 		if app.ModeratorID != nil {

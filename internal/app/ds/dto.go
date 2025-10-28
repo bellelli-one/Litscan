@@ -47,6 +47,7 @@ type AnalyseBooksDTO struct {
 	LexicalDiversity float64                `json:"lexical_diversity"`
 	ConjunctionFreq  float64                `json:"conjunction_freq"`
 	AvgSentenceLen   float64                `json:"avg_sentence_len"`
+	Response         *string                `json:"responce"`
 	Books            []BookInApplicationDTO `json:"books,omitempty"`
 }
 
@@ -83,6 +84,7 @@ type AnalyseBooksBadgeDTO struct {
 }
 
 type UserRegisterRequest struct {
+	FullName string `json:"full_name" binding:"required"`
 	Username string `json:"username" binding:"required"`
 	Password string `json:"password" binding:"required"`
 }
@@ -94,12 +96,14 @@ type UserLoginRequest struct {
 
 type UserDTO struct {
 	ID        uint   `json:"id"`
+	FullName  string `json:"full_name"`
 	Username  string `json:"username"`
 	Moderator bool   `json:"moderator"`
 }
 
 type UserUpdateRequest struct {
 	Username *string `json:"username"`
+	FullName *string `json:"full_name"`
 	Password *string `json:"password"`
 }
 

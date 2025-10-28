@@ -14,6 +14,7 @@ type AnalyseBooks struct {
 	LexicalDiversity float64    `gorm:"column:lexicalDiversity;type:numeric(10, 2)"`
 	ConjunctionFreq  float64    `gorm:"column:conjunctionFreq;type:numeric(10, 3)"`
 	AvgSentenceLen   float64    `gorm:"column:avgSentenceLen;type:numeric(10, 2)"`
+	Response         *string    `gorm:"column:response;type:text"`
 
 	// --- СВЯЗИ ---
 	// Отношение "принадлежит к": каждая заявка принадлежит одному пользователю.

@@ -1,0 +1,901 @@
+basePath: /api
+definitions:
+  ds.AnalyseBooksBadgeDTO:
+    properties:
+      application_id:
+        type: integer
+      count:
+        type: integer
+    type: object
+  ds.AnalyseBooksDTO:
+    properties:
+      avg_sentence_len:
+        type: number
+      avg_word_len:
+        type: number
+      books:
+        items:
+          $ref: '#/definitions/ds.BookInApplicationDTO'
+        type: array
+      completion_date:
+        type: string
+      conjunction_freq:
+        type: number
+      creation_date:
+        type: string
+      creator_login:
+        type: integer
+      forming_date:
+        type: string
+      id:
+        type: integer
+      lexical_diversity:
+        type: number
+      moderator_login:
+        type: integer
+      status:
+        type: integer
+    type: object
+  ds.AnalyseBooksResolveRequest:
+    properties:
+      action:
+        description: '"complete" | "reject"'
+        type: string
+    required:
+    - action
+    type: object
+  ds.AnalyseBooksUpdateRequest:
+    properties:
+      completion_date:
+        type: string
+      forming_date:
+        type: string
+      moderator:
+        type: boolean
+      status:
+        type: integer
+    type: object
+  ds.BookCreateRequest:
+    properties:
+      avg_sentence_len:
+        type: number
+      avg_word_len:
+        type: number
+      conjunction_freq:
+        type: number
+      image:
+        type: string
+      lexical_diversity:
+        type: number
+      text:
+        type: string
+      title:
+        type: string
+    required:
+    - text
+    - title
+    type: object
+  ds.BookDTO:
+    properties:
+      avg_sentence_len:
+        type: number
+      avg_word_len:
+        type: number
+      conjunction_freq:
+        type: number
+      id:
+        type: integer
+      image:
+        type: string
+      lexical_diversity:
+        type: number
+      status:
+        type: boolean
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  ds.BookInApplicationDTO:
+    properties:
+      avg_sentence_len:
+        type: number
+      avg_word_len:
+        type: number
+      book_id:
+        type: integer
+      conjunction_freq:
+        type: number
+      description:
+        type: string
+      image:
+        type: string
+      lexical_diversity:
+        type: number
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  ds.BookToApplicationUpdateRequest:
+    properties:
+      description:
+        type: string
+    type: object
+  ds.BookUpdateRequest:
+    properties:
+      avg_sentence_len:
+        type: number
+      avg_word_len:
+        type: number
+      conjunction_freq:
+        type: number
+      image:
+        type: string
+      lexical_diversity:
+        type: number
+      status:
+        type: boolean
+      text:
+        type: string
+      title:
+        type: string
+    type: object
+  ds.LoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/ds.UserDTO'
+    type: object
+  ds.PaginatedResponse:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
+  ds.UserDTO:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+      moderator:
+        type: boolean
+      username:
+        type: string
+    type: object
+  ds.UserLoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  ds.UserRegisterRequest:
+    properties:
+      full_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - full_name
+    - password
+    - username
+    type: object
+  ds.UserUpdateRequest:
+    properties:
+      full_name:
+        type: string
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+host: localhost:8090
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+  description: API-сервер для управления заявками и книгами в системе AnalyseBooks.
+  title: API для системы AnalyseBooks
+  version: "1.0"
+paths:
+  /analyse-books/draft/books/{book_id}:
+    post:
+      description: Находит или создает черновик заявки для текущего пользователя и
+        добавляет в него книгу.
+      parameters:
+      - description: ID книги для добавления
+        in: path
+        name: book_id
+        required: true
+        type: integer
+      responses:
+        "201":
+          description: Сообщение об успехе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Добавить книгу в черновик заявки (все)
+      tags:
+      - books
+  /analysebooks:
+    get:
+      description: Возвращает отфильтрованный список всех сформированных заявок (кроме
+        черновиков и удаленных).
+      parameters:
+      - description: Фильтр по статусу заявки
+        in: query
+        name: status
+        type: string
+      - description: Фильтр по дате 'от' (формат YYYY-MM-DD)
+        in: query
+        name: from
+        type: string
+      - description: Фильтр по дате 'до' (формат YYYY-MM-DD)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ds.AnalyseBooksDTO'
+            type: array
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить список заявок (авторизованный пользователь)
+      tags:
+      - analysebooks
+  /analysebooks/{id}:
+    delete:
+      description: Логически удаляет заявку, переводя ее в статус "удалена".
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить заявку (авторизованный пользователь)
+      tags:
+      - analysebooks
+    get:
+      description: Возвращает полную информацию о заявке, включая привязанные книги.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.AnalyseBooksDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Заявка не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить одну заявку по ID (авторизованный пользователь)
+      tags:
+      - analysebooks
+    put:
+      consumes:
+      - application/json
+      description: Позволяет пользователю обновить поля своей заявки.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.AnalyseBooksUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить данные заявки (авторизованный пользователь)
+      tags:
+      - analysebooks
+  /analysebooks/{id}/books/{book_id}:
+    delete:
+      description: Удаляет связь между заявкой и книгой.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID книги
+        in: path
+        name: book_id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить книгу из заявки (авторизованный пользователь)
+      tags:
+      - analysebooks-m-m
+    put:
+      consumes:
+      - application/json
+      description: Изменяет дополнительное описание для конкретной книги в рамках
+        одной заявки.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: ID книги
+        in: path
+        name: book_id
+        required: true
+        type: integer
+      - description: Новое описание
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.BookToApplicationUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить описание книги в заявке (авторизованный пользователь)
+      tags:
+      - analysebooks-m-m
+  /analysebooks/{id}/form:
+    put:
+      description: Переводит заявку из статуса "черновик" в "сформирована".
+      parameters:
+      - description: ID заявки (черновика)
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Не все поля заполнены
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Сформировать заявку (авторизованный пользователь)
+      tags:
+      - analysebooks
+  /analysebooks/{id}/resolve:
+    put:
+      consumes:
+      - application/json
+      description: Модератор завершает (с расчетом) или отклоняет заявку.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 'Действие: ''complete'' или ''reject'''
+        in: body
+        name: action
+        required: true
+        schema:
+          $ref: '#/definitions/ds.AnalyseBooksResolveRequest'
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Завершить или отклонить заявку (только модератор)
+      tags:
+      - analysebooks
+  /analysebooks/cart:
+    get:
+      description: Возвращает ID черновика текущего пользователя и количество книг
+        в нем.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.AnalyseBooksBadgeDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получить информацию для иконки корзины (авторизованный пользователь)
+      tags:
+      - analysebooks
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Получение JWT токена по логину и паролю для доступа к защищенным
+        эндпоинтам.
+      parameters:
+      - description: Учетные данные пользователя
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.LoginResponse'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Неверные учетные данные
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя (все)
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Добавляет текущий JWT токен в черный список, делая его недействительным.
+        Требует авторизации.
+      responses:
+        "200":
+          description: Сообщение об успехе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Выход из системы (авторизованный пользователь)
+      tags:
+      - auth
+  /books:
+    get:
+      description: Возвращает постраничный список книг.
+      parameters:
+      - description: Фильтр по названию книги
+        in: query
+        name: title
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.PaginatedResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список книг (все)
+      tags:
+      - books
+    post:
+      consumes:
+      - application/json
+      description: Создает новую запись о книге.
+      parameters:
+      - description: Данные новой книги
+        in: body
+        name: bookData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.BookCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.BookDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен (не модератор)
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Создать новую книгу (только модератор)
+      tags:
+      - books
+  /books/{id}:
+    delete:
+      description: Удаляет книгу из системы.
+      parameters:
+      - description: ID книги для удаления
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Удалить книгу (только модератор)
+      tags:
+      - books
+    get:
+      description: Возвращает детальную информацию о книге.
+      parameters:
+      - description: ID книги
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.BookDTO'
+        "404":
+          description: Книга не найдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить одну книгу по ID (все)
+      tags:
+      - books
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о существующей книге.
+      parameters:
+      - description: ID книги
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.BookUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.BookDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновить книгу (только модератор)
+      tags:
+      - books
+  /books/{id}/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Загружает и привязывает изображение к книге.
+      parameters:
+      - description: ID книги
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Файл изображения
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: URL загруженного изображения
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Файл не предоставлен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Доступ запрещен
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Загрузить изображение для книги (только модератор)
+      tags:
+      - books
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя в системе. По умолчанию роль "пользователь",
+        не "модератор".
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/ds.UserDTO'
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация нового пользователя (все)
+      tags:
+      - auth
+  /users/{id}:
+    get:
+      description: Возвращает публичные данные пользователя. Требует авторизации.
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ds.UserDTO'
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Пользователь не найден
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Получение данных пользователя по ID (авторизованный пользователь)
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Обновляет имя пользователя или пароль. Требует авторизации.
+      parameters:
+      - description: ID пользователя
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: updateData
+        required: true
+        schema:
+          $ref: '#/definitions/ds.UserUpdateRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Ошибка валидации
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Обновление данных пользователя (авторизованный пользователь)
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

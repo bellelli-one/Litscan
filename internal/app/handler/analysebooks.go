@@ -10,6 +10,16 @@ import (
 )
 
 // GET /api/analysebooks/cart - иконка корзины
+
+// GetCartBadge godoc
+// @Summary      Получить информацию для иконки корзины (авторизованный пользователь)
+// @Description  Возвращает ID черновика текущего пользователя и количество книг в нем.
+// @Tags         analysebooks
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Success      200 {object} ds.AnalyseBooksBadgeDTO
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /analysebooks/cart [get]
 func (h *Handler) GetCartBadge(c *gin.Context) {
 	draft, err := h.Repository.GetDraftAnalyseBooks(hardcodedUserID)
 	if err != nil {
@@ -37,12 +47,32 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 }
 
 // GET /api/analysebooks - список заявок с фильтрацией
+
+// ListAnalyseBooks godoc
+// @Summary      Получить список заявок (авторизованный пользователь)
+// @Description  Возвращает отфильтрованный список всех сформированных заявок (кроме черновиков и удаленных).
+// @Tags         analysebooks
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        status query string false "Фильтр по статусу заявки"
+// @Param        from query string false "Фильтр по дате 'от' (формат YYYY-MM-DD)"
+// @Param        to query string false "Фильтр по дате 'до' (формат YYYY-MM-DD)"
+// @Success      200 {array} ds.AnalyseBooksDTO
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /analysebooks [get]
 func (h *Handler) ListAnalyseBooks(c *gin.Context) {
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+	isModerator := isUserModerator(c)
+
 	status := c.Query("status")
 	from := c.Query("from")
 	to := c.Query("to")
 
-	appList, err := h.Repository.AnalyseBooksListFiltered(status, from, to)
+	appList, err := h.Repository.AnalyseBooksListFiltered(userID, isModerator, status, from, to)
 	if err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
@@ -52,6 +82,18 @@ func (h *Handler) ListAnalyseBooks(c *gin.Context) {
 }
 
 // GET /api/analysebooks/:id - одна заявка с книгами
+
+// GetAnalyseBooks godoc
+// @Summary      Получить одну заявку по ID (авторизованный пользователь)
+// @Description  Возвращает полную информацию о заявке, включая привязанные книги.
+// @Tags         analysebooks
+// @Produce      json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Success      200 {object} ds.AnalyseBooksDTO
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      404 {object} map[string]string "Заявка не найдена"
+// @Router       /analysebooks/{id} [get]
 func (h *Handler) GetAnalyseBooks(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -103,6 +145,18 @@ func (h *Handler) GetAnalyseBooks(c *gin.Context) {
 }
 
 // PUT /api/analysebooks/:id - изменение полей заявки
+
+// UpdateAnalyseBooks godoc
+// @Summary      Обновить данные заявки (авторизованный пользователь)
+// @Description  Позволяет пользователю обновить поля своей заявки.
+// @Tags         analysebooks
+// @Accept       json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        updateData body ds.AnalyseBooksUpdateRequest true "Данные для обновления"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /analysebooks/{id} [put]
 func (h *Handler) UpdateAnalyseBooks(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -127,6 +181,17 @@ func (h *Handler) UpdateAnalyseBooks(c *gin.Context) {
 }
 
 // PUT /api/analysebooks/:id/form - сформировать заявку
+
+// FormAnalyseBooks godoc
+// @Summary      Сформировать заявку (авторизованный пользователь)
+// @Description  Переводит заявку из статуса "черновик" в "сформирована".
+// @Tags         analysebooks
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки (черновика)"
+// @Success      204 "No Content"
+// @Failure      400 {object} map[string]string "Не все поля заполнены"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /analysebooks/{id}/form [put]
 func (h *Handler) FormAnalyseBooks(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -145,6 +210,19 @@ func (h *Handler) FormAnalyseBooks(c *gin.Context) {
 }
 
 // PUT /api/analysebooks/:id/resolve - завершить/отклонить заявку
+
+// ResolveAnalyseBooks godoc
+// @Summary      Завершить или отклонить заявку (только модератор)
+// @Description  Модератор завершает (с расчетом) или отклоняет заявку.
+// @Tags         analysebooks
+// @Accept       json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        action body ds.AnalyseBooksResolveRequest true "Действие: 'complete' или 'reject'"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Failure      403 {object} map[string]string "Доступ запрещен"
+// @Router       /analysebooks/{id}/resolve [put]
 func (h *Handler) ResolveAnalyseBooks(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -170,6 +248,16 @@ func (h *Handler) ResolveAnalyseBooks(c *gin.Context) {
 }
 
 // DELETE /api/analysebooks/:id - удаление заявки
+
+// DeleteAnalyseBooks godoc
+// @Summary      Удалить заявку (авторизованный пользователь)
+// @Description  Логически удаляет заявку, переводя ее в статус "удалена".
+// @Tags         analysebooks
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /analysebooks/{id} [delete]
 func (h *Handler) DeleteAnalyseBooks(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -188,6 +276,17 @@ func (h *Handler) DeleteAnalyseBooks(c *gin.Context) {
 }
 
 // DELETE /api/analysebooks/:id/books/:book_id - удаление книги из заявки
+
+// RemoveBookFromAnalyseBooks godoc
+// @Summary      Удалить книгу из заявки (авторизованный пользователь)
+// @Description  Удаляет связь между заявкой и книгой.
+// @Tags         analysebooks-m-m
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        book_id path int true "ID книги"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /analysebooks/{id}/books/{book_id} [delete]
 func (h *Handler) RemoveBookFromAnalyseBooks(c *gin.Context) {
 	appID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -212,6 +311,19 @@ func (h *Handler) RemoveBookFromAnalyseBooks(c *gin.Context) {
 }
 
 // PUT /api/analysebooks/:id/books/:book_id - изменение м-м связи
+
+// UpdateBookToApplication godoc
+// @Summary      Обновить описание книги в заявке (авторизованный пользователь)
+// @Description  Изменяет дополнительное описание для конкретной книги в рамках одной заявки.
+// @Tags         analysebooks-m-m
+// @Accept       json
+// @Security     ApiKeyAuth
+// @Param        id path int true "ID заявки"
+// @Param        book_id path int true "ID книги"
+// @Param        updateData body ds.BookToApplicationUpdateRequest true "Новое описание"
+// @Success      204 "No Content"
+// @Failure      401 {object} map[string]string "Необходима авторизация"
+// @Router       /analysebooks/{id}/books/{book_id} [put]
 func (h *Handler) UpdateBookToApplication(c *gin.Context) {
 	appID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -244,66 +356,3 @@ func (h *Handler) UpdateBookToApplication(c *gin.Context) {
 		"message": "Дополнительная информация к книге обновлена",
 	})
 }
-
-// const hardcodedUserID = 2
-
-// func (h *Handler) AddBookToAppl(c *gin.Context) {
-// 	bookID, err := strconv.Atoi(c.Param("book_id"))
-// 	if err != nil {
-// 		h.errorHandler(c, http.StatusBadRequest, err)
-// 		return
-// 	}
-
-// 	appl, err := h.Repository.GetDraftAppl(hardcodedUserID)
-// 	if errors.Is(err, gorm.ErrRecordNotFound) {
-// 		newAppl := ds.Application{
-// 			CreatorID: hardcodedUserID,
-// 			Status:    ds.StatusDraft,
-// 		}
-// 		if createErr := h.Repository.CreateAppl(&newAppl); createErr != nil {
-// 			h.errorHandler(c, http.StatusInternalServerError, createErr)
-// 			return
-// 		}
-// 		appl = &newAppl
-// 	} else if err != nil {
-// 		h.errorHandler(c, http.StatusInternalServerError, err)
-// 		return
-// 	}
-
-// 	if err = h.Repository.AddBookToAppl(appl.ID, uint(bookID)); err != nil {
-// 	}
-
-// 	c.Redirect(http.StatusFound, "/litscan")
-// }
-
-// func (h *Handler) GetAppl(c *gin.Context) {
-// 	applID, err := strconv.Atoi(c.Param("appl_id"))
-// 	if err != nil {
-// 		h.errorHandler(c, http.StatusBadRequest, err)
-// 		return
-// 	}
-
-// 	appl, err := h.Repository.GetApplWithBooks(uint(applID))
-// 	if err != nil {
-// 		h.errorHandler(c, http.StatusNotFound, err)
-// 		return
-// 	}
-
-// 	if len(appl.BooksLink) == 0 {
-// 		h.errorHandler(c, http.StatusForbidden, errors.New("cannot access an empty appl page, add books first"))
-// 		return
-// 	}
-
-// 	c.HTML(http.StatusOK, "order.html", appl)
-// }
-
-// func (h *Handler) DeleteAppl(c *gin.Context) {
-// 	applID, _ := strconv.Atoi(c.Param("appl_id"))
-
-// 	if err := h.Repository.LogicallyDeleteAppl(uint(applID)); err != nil {
-// 		h.errorHandler(c, http.StatusInternalServerError, err)
-// 		return
-// 	}
-
-// 	c.Redirect(http.StatusFound, "/litscan")
-// }
