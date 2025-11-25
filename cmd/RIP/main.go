@@ -36,7 +36,14 @@ func main() {
 
 	// CORS middleware
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		// Вместо AllowOrigins используем функцию для проверки
+		AllowOriginFunc: func(origin string) bool {
+			// Список разрешенных адресов
+			return origin == "http://localhost:3000" ||
+				origin == "tauri://localhost" || // Для macOS/Linux
+				origin == "https://tauri.localhost" || // Для Windows
+				origin == "http://192.168.1.151:3000" // Для тестов с телефона/сети
+		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
