@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API-сервер для управления заявками и книгами в системе AnalyseBooks.",
-        "title": "API для системы AnalyseBooks",
+        "description": "API-сервер для управления книгами, заявками и анализом текстов",
+        "title": "API для системы анализа книг",
         "contact": {
             "name": "API Support",
             "email": "support@example.com"
@@ -1126,6 +1126,9 @@
                 "moderator_login": {
                     "type": "integer"
                 },
+                "responce": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "integer"
                 }
@@ -1146,17 +1149,17 @@
         "ds.AnalyseBooksUpdateRequest": {
             "type": "object",
             "properties": {
-                "completion_date": {
-                    "type": "string"
+                "avg_sentence_len": {
+                    "type": "number"
                 },
-                "forming_date": {
-                    "type": "string"
+                "avg_word_len": {
+                    "type": "number"
                 },
-                "moderator": {
-                    "type": "boolean"
+                "conjunction_freq": {
+                    "type": "number"
                 },
-                "status": {
-                    "type": "integer"
+                "lexical_diversity": {
+                    "type": "number"
                 }
             }
         },

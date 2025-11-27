@@ -33,6 +33,8 @@ definitions:
         type: number
       moderator_login:
         type: integer
+      responce:
+        type: string
       status:
         type: integer
     type: object
@@ -46,14 +48,14 @@ definitions:
     type: object
   ds.AnalyseBooksUpdateRequest:
     properties:
-      completion_date:
-        type: string
-      forming_date:
-        type: string
-      moderator:
-        type: boolean
-      status:
-        type: integer
+      avg_sentence_len:
+        type: number
+      avg_word_len:
+        type: number
+      conjunction_freq:
+        type: number
+      lexical_diversity:
+        type: number
     type: object
   ds.BookCreateRequest:
     properties:
@@ -202,8 +204,8 @@ info:
   contact:
     email: support@example.com
     name: API Support
-  description: API-сервер для управления заявками и книгами в системе AnalyseBooks.
-  title: API для системы AnalyseBooks
+  description: API-сервер для управления книгами, заявками и анализом текстов
+  title: API для системы анализа книг
   version: "1.0"
 paths:
   /analyse-books/draft/books/{book_id}:

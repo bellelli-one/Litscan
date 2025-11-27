@@ -68,10 +68,10 @@ type BookToApplicationUpdateRequest struct {
 }
 
 type AnalyseBooksUpdateRequest struct {
-	Status         *int       `json:"status"`
-	Moderator      *bool      `json:"moderator"`
-	FormingDate    *time.Time `json:"forming_date"`
-	CompletionDate *time.Time `json:"completion_date"`
+	AvgWordLen       *float64 `json:"avg_word_len"`
+	LexicalDiversity *float64 `json:"lexical_diversity"`
+	ConjunctionFreq  *float64 `json:"conjunction_freq"`
+	AvgSentenceLen   *float64 `json:"avg_sentence_len"`
 }
 
 type AnalyseBooksResolveRequest struct {

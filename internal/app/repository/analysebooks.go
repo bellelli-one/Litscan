@@ -98,19 +98,20 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 func (r *Repository) UpdateAnalyseBooksUserFields(id uint, req ds.AnalyseBooksUpdateRequest) error {
 	updates := make(map[string]interface{})
 
-	if req.Status != nil {
-		updates["status"] = *req.Status
+	if req.AvgWordLen != nil {
+		updates["avg_word_len"] = *req.AvgWordLen
 	}
-	if req.Moderator != nil {
-		updates["moderator"] = *req.Moderator
+	if req.LexicalDiversity != nil {
+		updates["lexical_diversity"] = *req.LexicalDiversity
 	}
-	if req.FormingDate != nil {
-		updates["forming_date"] = *req.FormingDate
+	if req.ConjunctionFreq != nil {
+		updates["conjunction_freq"] = *req.ConjunctionFreq
 	}
-	if req.CompletionDate != nil {
-		updates["complition_date"] = *req.CompletionDate
+	if req.AvgSentenceLen != nil {
+		updates["avg_sentence_len"] = *req.AvgSentenceLen
 	}
 
+	// Если нечего обновлять — выходим
 	if len(updates) == 0 {
 		return nil
 	}

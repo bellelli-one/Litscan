@@ -1132,6 +1132,9 @@ const docTemplate = `{
                 "moderator_login": {
                     "type": "integer"
                 },
+                "responce": {
+                    "type": "string"
+                },
                 "status": {
                     "type": "integer"
                 }
@@ -1152,17 +1155,17 @@ const docTemplate = `{
         "ds.AnalyseBooksUpdateRequest": {
             "type": "object",
             "properties": {
-                "completion_date": {
-                    "type": "string"
+                "avg_sentence_len": {
+                    "type": "number"
                 },
-                "forming_date": {
-                    "type": "string"
+                "avg_word_len": {
+                    "type": "number"
                 },
-                "moderator": {
-                    "type": "boolean"
+                "conjunction_freq": {
+                    "type": "number"
                 },
-                "status": {
-                    "type": "integer"
+                "lexical_diversity": {
+                    "type": "number"
                 }
             }
         },
@@ -1398,8 +1401,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8090",
 	BasePath:         "/api",
 	Schemes:          []string{},
-	Title:            "API для системы AnalyseBooks",
-	Description:      "API-сервер для управления заявками и книгами в системе AnalyseBooks.",
+	Title:            "API для системы анализа книг",
+	Description:      "API-сервер для управления книгами, заявками и анализом текстов",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

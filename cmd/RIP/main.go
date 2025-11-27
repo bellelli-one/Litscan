@@ -36,13 +36,12 @@ func main() {
 
 	// CORS middleware
 	router.Use(cors.New(cors.Config{
-		// Вместо AllowOrigins используем функцию для проверки
 		AllowOriginFunc: func(origin string) bool {
-			// Список разрешенных адресов
 			return origin == "http://localhost:3000" ||
 				origin == "tauri://localhost" || // Для macOS/Linux
 				origin == "https://tauri.localhost" || // Для Windows
-				origin == "http://192.168.1.151:3000" // Для тестов с телефона/сети
+				origin == "http://192.168.1.151:3000" || // Для тестов с телефона/сети
+				origin == "https://bellelli-one.github.io" // для gh-pages
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
@@ -50,32 +49,26 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Загрузка конфигурации
 	conf, err := config.NewConfig()
 	if err != nil {
 		logrus.Fatalf("error loading config: %v", err)
 	}
 
-	// Подключение к PostgreSQL
 	postgresString := dsn.FromEnv()
 	fmt.Println(postgresString)
 
-	// Инициализация репозитория
 	rep, errRep := repository.New(postgresString)
 	if errRep != nil {
 		logrus.Fatalf("error initializing repository: %v", errRep)
 	}
 
-	// Инициализация Redis
 	redisClient, errRedis := redis.New(context.Background(), conf.Redis)
 	if errRedis != nil {
 		logrus.Fatalf("error initializing redis: %v", errRedis)
 	}
 
-	// Инициализация хендлеров
 	hand := handler.NewHandler(rep, redisClient, &conf.JWT)
 
-	// Запуск приложения
 	application := pkg.NewApp(conf, router, hand)
 	application.RunApp()
 }
