@@ -43,15 +43,15 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		auth.PUT("/users/:id", h.UpdateUserData)
 
 		// Заявки AnalyseBooks
-		auth.POST("/analyse-books/draft/books/:book_id", h.AddBookToDraft)
-		auth.GET("/analyse-books/cart", h.GetCartBadge)
-		auth.GET("/analyse-books", h.ListAnalyseBooks)
-		auth.GET("/analyse-books/:id", h.GetAnalyseBooks)
-		auth.PUT("/analyse-books/:id", h.UpdateAnalyseBooks)
-		auth.PUT("/analyse-books/:id/form", h.FormAnalyseBooks)
-		auth.DELETE("/analyse-books/:id", h.DeleteAnalyseBooks)
-		auth.DELETE("/analyse-books/:id/books/:book_id", h.RemoveBookFromAnalyseBooks)
-		auth.PUT("/analyse-books/:id/books/:book_id", h.UpdateBookToApplication)
+		auth.POST("/analysebooks/draft/books/:book_id", h.AddBookToDraft)
+		auth.GET("/analysebooks/cart", h.GetCartBadge)
+		auth.GET("/analysebooks", h.ListAnalyseBooks)
+		auth.GET("/analysebooks/:id", h.GetAnalyseBooks)
+		auth.PUT("/analysebooks/:id", h.UpdateAnalyseBooks)
+		auth.PUT("/analysebooks/:id/form", h.FormAnalyseBooks)
+		auth.DELETE("/analysebooks/:id", h.DeleteAnalyseBooks)
+		auth.DELETE("/analysebooks/:id/books/:book_id", h.RemoveBookFromAnalyseBooks)
+		auth.PUT("/analysebooks/:id/books/:book_id", h.UpdateBookToApplication)
 	}
 
 	// Эндпоинты, доступные только модераторам
@@ -65,7 +65,7 @@ func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 		moderator.POST("/books/:id/image", h.UploadBookImage)
 
 		// Управление заявками AnalyseBooks
-		moderator.PUT("/analyse-books/:id/resolve", h.ResolveAnalyseBooks)
+		moderator.PUT("/analysebooks/:id/resolve", h.ResolveAnalyseBooks)
 	}
 }
 
