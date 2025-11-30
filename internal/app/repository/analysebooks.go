@@ -78,8 +78,8 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 			CreatorID:        app.Creator.ID,
 			ModeratorID:      nil,
 			FormingDate:      app.FormingDate,
-			CompletionDate:   app.ComplitionDate,
-			AwgWordLen:       app.AwgWordLen,
+			CompletionDate:   app.CompletionDate,
+			AvgWordLen:       app.AvgWordLen,
 			LexicalDiversity: app.LexicalDiversity,
 			ConjunctionFreq:  app.ConjunctionFreq,
 			AvgSentenceLen:   app.AvgSentenceLen,
@@ -209,7 +209,7 @@ func (r *Repository) ResolveAnalyseBooks(id uint, moderatorID uint, action strin
 func (r *Repository) calculateBookSimilarity(app ds.AnalyseBooks, book ds.Books) float64 {
 	// Вектор из заявкиt
 	appVector := []float64{
-		app.AwgWordLen,
+		app.AvgWordLen,
 		app.LexicalDiversity,
 		app.ConjunctionFreq,
 		app.AvgSentenceLen,

@@ -43,11 +43,11 @@ type AnalyseBooksDTO struct {
 	ModeratorID      *uint                  `json:"moderator_login"`
 	FormingDate      *time.Time             `json:"forming_date"`
 	CompletionDate   *time.Time             `json:"completion_date"`
-	AwgWordLen       float64                `json:"avg_word_len"`
+	AvgWordLen       float64                `json:"avg_word_len"`
 	LexicalDiversity float64                `json:"lexical_diversity"`
 	ConjunctionFreq  float64                `json:"conjunction_freq"`
 	AvgSentenceLen   float64                `json:"avg_sentence_len"`
-	Response         *string                `json:"responce"`
+	Response         *string                `json:"response"`
 	Books            []BookInApplicationDTO `json:"books,omitempty"`
 }
 
@@ -67,7 +67,14 @@ type BookToApplicationUpdateRequest struct {
 	Description *string `json:"description"`
 }
 
+// AnalyseBooksUpdateRequest - Исправлено: добавлены поля статуса и дат
 type AnalyseBooksUpdateRequest struct {
+	Status         *int       `json:"status"`
+	FormingDate    *time.Time `json:"forming_date"`
+	CompletionDate *time.Time `json:"completion_date"`
+	Moderator      *bool      `json:"moderator"`
+
+	// Новые поля метрик
 	AvgWordLen       *float64 `json:"avg_word_len"`
 	LexicalDiversity *float64 `json:"lexical_diversity"`
 	ConjunctionFreq  *float64 `json:"conjunction_freq"`
