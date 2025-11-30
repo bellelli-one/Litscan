@@ -208,40 +208,6 @@ info:
   title: API для системы анализа книг
   version: "1.0"
 paths:
-  /analyse-books/draft/books/{book_id}:
-    post:
-      description: Находит или создает черновик заявки для текущего пользователя и
-        добавляет в него книгу.
-      parameters:
-      - description: ID книги для добавления
-        in: path
-        name: book_id
-        required: true
-        type: integer
-      responses:
-        "201":
-          description: Сообщение об успехе
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "401":
-          description: Необходима авторизация
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Внутренняя ошибка сервера
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Добавить книгу в черновик заявки (все)
-      tags:
-      - books
   /analysebooks:
     get:
       description: Возвращает отфильтрованный список всех сформированных заявок (кроме
@@ -516,6 +482,40 @@ paths:
       summary: Получить информацию для иконки корзины (авторизованный пользователь)
       tags:
       - analysebooks
+  /analysebooks/draft/books/{book_id}:
+    post:
+      description: Находит или создает черновик заявки для текущего пользователя и
+        добавляет в него книгу.
+      parameters:
+      - description: ID книги для добавления
+        in: path
+        name: book_id
+        required: true
+        type: integer
+      responses:
+        "201":
+          description: Сообщение об успехе
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Необходима авторизация
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Добавить книгу в черновик заявки (все)
+      tags:
+      - books
   /auth/login:
     post:
       consumes:

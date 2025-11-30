@@ -21,8 +21,18 @@ import (
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Router       /analysebooks/cart [get]
 func (h *Handler) GetCartBadge(c *gin.Context) {
-	draft, err := h.Repository.GetDraftAnalyseBooks(hardcodedUserID)
+	logrus.Info("DEBUG: Зашли в функцию GetCartBadge (НОВАЯ ВЕРСИЯ)")
+	// 1. Получаем ID (КАК У ДРУГА)
+	userID, err := getUserIDFromContext(c)
 	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	// 2. Ищем черновик заявки (AnalyseBooks вместо Frax)
+	draft, err := h.Repository.GetDraftAnalyseBooks(userID)
+	if err != nil {
+		// Если черновика нет — возвращаем пустую корзину (200 OK)
 		c.JSON(http.StatusOK, ds.AnalyseBooksBadgeDTO{
 			ApplicationID: nil,
 			Count:         0,
@@ -30,6 +40,7 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 		return
 	}
 
+	// 3. Загружаем связи с книгами (Books вместо Factors)
 	fullApp, err := h.Repository.GetAnalyseBooksWithBooks(draft.ID)
 	if err != nil {
 		logrus.Error("Error getting application with books:", err)
@@ -40,9 +51,10 @@ func (h *Handler) GetCartBadge(c *gin.Context) {
 		return
 	}
 
+	// 4. Отдаем результат
 	c.JSON(http.StatusOK, ds.AnalyseBooksBadgeDTO{
 		ApplicationID: &fullApp.ID,
-		Count:         len(fullApp.BooksLink),
+		Count:         len(fullApp.BooksLink), // Или len(fullApp.Books), зависит от твоей модели
 	})
 }
 
@@ -199,7 +211,15 @@ func (h *Handler) FormAnalyseBooks(c *gin.Context) {
 		return
 	}
 
-	if err := h.Repository.FormAnalyseBooks(uint(id), hardcodedUserID); err != nil {
+	// 1. Получаем ID текущего пользователя из контекста (КАК У ДРУГА)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	// 2. Передаем реальный userID вместо hardcodedUserID
+	if err := h.Repository.FormAnalyseBooks(uint(id), userID); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
@@ -236,7 +256,15 @@ func (h *Handler) ResolveAnalyseBooks(c *gin.Context) {
 		return
 	}
 
-	moderatorID := uint(hardcodedUserID)
+	// 1. Получаем ID модератора из контекста (КАК У ДРУГА)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	// 2. Используем реальный ID
+	moderatorID := uint(userID)
 	if err := h.Repository.ResolveAnalyseBooks(uint(id), moderatorID, req.Action); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return

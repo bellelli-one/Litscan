@@ -18,58 +18,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/analyse-books/draft/books/{book_id}": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Находит или создает черновик заявки для текущего пользователя и добавляет в него книгу.",
-                "tags": [
-                    "books"
-                ],
-                "summary": "Добавить книгу в черновик заявки (все)",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "ID книги для добавления",
-                        "name": "book_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Сообщение об успехе",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Необходима авторизация",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка сервера",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/analysebooks": {
             "get": {
                 "security": [
@@ -151,6 +99,58 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Необходима авторизация",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/analysebooks/draft/books/{book_id}": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Находит или создает черновик заявки для текущего пользователя и добавляет в него книгу.",
+                "tags": [
+                    "books"
+                ],
+                "summary": "Добавить книгу в черновик заявки (все)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID книги для добавления",
+                        "name": "book_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Сообщение об успехе",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Необходима авторизация",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {

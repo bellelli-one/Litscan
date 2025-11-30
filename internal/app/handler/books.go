@@ -222,7 +222,7 @@ func (h *Handler) DeleteBook(c *gin.Context) {
 	})
 }
 
-// POST /api/analyse-books/draft/books/:book_id - добавление книги в черновик
+// POST /api/analysebooks/draft/books/:book_id - добавление книги в черновик
 
 // AddBookToDraft godoc
 // @Summary      Добавить книгу в черновик заявки (все)
@@ -233,15 +233,25 @@ func (h *Handler) DeleteBook(c *gin.Context) {
 // @Success      201 {object} map[string]string "Сообщение об успехе"
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Failure      500 {object} map[string]string "Внутренняя ошибка сервера"
-// @Router       /analyse-books/draft/books/{book_id} [post]
+// @Router       /analysebooks/draft/books/{book_id} [post]
 func (h *Handler) AddBookToDraft(c *gin.Context) {
+	// 1. Получаем ID книги из URL
 	bookID, err := strconv.Atoi(c.Param("book_id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := h.Repository.AddBookToDraft(hardcodedUserID, uint(bookID)); err != nil {
+	// 2. Получаем ID текущего пользователя (КАК У ДРУГА)
+	userID, err := getUserIDFromContext(c)
+	if err != nil {
+		h.errorHandler(c, http.StatusUnauthorized, err)
+		return
+	}
+
+	// 3. Вызываем репозиторий с реальным userID
+	// Обрати внимание: hardcodedUserID заменен на userID
+	if err := h.Repository.AddBookToDraft(userID, uint(bookID)); err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return
 	}

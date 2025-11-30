@@ -37,11 +37,12 @@ func main() {
 	// CORS middleware
 	router.Use(cors.New(cors.Config{
 		AllowOriginFunc: func(origin string) bool {
-			return origin == "http://localhost:3000" ||
-				origin == "tauri://localhost" || // Для macOS/Linux
-				origin == "https://tauri.localhost" || // Для Windows
-				origin == "http://192.168.1.151:3000" || // Для тестов с телефона/сети
-				origin == "https://bellelli-one.github.io" // для gh-pages
+			return origin == "https://localhost:3000" ||
+				origin == "tauri://localhost" ||
+				origin == "https://tauri.localhost" ||
+				origin == "https://192.168.1.151:3000" ||
+				origin == "http://192.168.1.151:3000" ||
+				origin == "https://bellelli-one.github.io"
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
