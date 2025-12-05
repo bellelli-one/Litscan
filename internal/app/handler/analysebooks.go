@@ -2,6 +2,9 @@ package handler
 
 import (
 	"RIP/internal/app/ds"
+	"bytes"
+	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -146,6 +149,7 @@ func (h *Handler) GetAnalyseBooks(c *gin.Context) {
 		LexicalDiversity: app.LexicalDiversity,
 		ConjunctionFreq:  app.ConjunctionFreq,
 		AvgSentenceLen:   app.AvgSentenceLen,
+		Response:         app.Response,
 		Books:            books,
 	}
 
@@ -205,29 +209,99 @@ func (h *Handler) UpdateAnalyseBooks(c *gin.Context) {
 // @Failure      401 {object} map[string]string "Необходима авторизация"
 // @Router       /analysebooks/{id}/form [put]
 func (h *Handler) FormAnalyseBooks(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	// 1. Парсинг ID
+	appID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// 1. Получаем ID текущего пользователя из контекста (КАК У ДРУГА)
+	// 2. Получаем ID пользователя (нужно для твоей функции FormAnalyseBooks)
 	userID, err := getUserIDFromContext(c)
 	if err != nil {
 		h.errorHandler(c, http.StatusUnauthorized, err)
 		return
 	}
 
-	// 2. Передаем реальный userID вместо hardcodedUserID
-	if err := h.Repository.FormAnalyseBooks(uint(id), userID); err != nil {
+	// 3. ВЫЗЫВАЕМ ТВОЮ ФУНКЦИЮ РЕПОЗИТОРИЯ
+	// Она сама проверит:
+	// - Является ли юзер создателем
+	// - Является ли заявка черновиком
+	// - Есть ли книги
+	// И если все ок — поставит статус 3 (Сформирован) и дату.
+	if err := h.Repository.FormAnalyseBooks(uint(appID), userID); err != nil {
+		// Если ошибка (например, нет книг или чужая заявка) — возвращаем её
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{
-		"message": "Заявка сформирована",
+	// 4. Достаем данные для Python
+	// Нам нужно получить заявку заново, чтобы у нас был список книг (BooksLink)
+	app, err := h.Repository.GetAnalyseBooksWithBooks(uint(appID))
+	if err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	// 5. Формируем JSON для Python (через DTO)
+	payload := ds.AnalyseBooksDTO{
+		ID:               app.ID,
+		Status:           app.Status, // Статус уже обновился на 3
+		AvgWordLen:       app.AvgWordLen,
+		LexicalDiversity: app.LexicalDiversity,
+		ConjunctionFreq:  app.ConjunctionFreq,
+		AvgSentenceLen:   app.AvgSentenceLen,
+		Books:            make([]ds.BookInApplicationDTO, 0, len(app.BooksLink)),
+	}
+
+	for _, link := range app.BooksLink {
+		book := link.Book
+		payload.Books = append(payload.Books, ds.BookInApplicationDTO{
+			BookID:           book.ID,
+			Title:            book.Title,
+			AvgWordLen:       book.AvgWordLen,
+			LexicalDiversity: book.LexicalDiversity,
+			ConjunctionFreq:  book.ConjunctionFreq,
+			AvgSentenceLen:   book.AvgSentenceLen,
+		})
+	}
+
+	// 6. Асинхронно отправляем в Python
+	go func(data ds.AnalyseBooksDTO) {
+		url := "http://localhost:8000/api/analyze"
+		requestBody, _ := json.Marshal(data)
+		http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+	}(payload)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Заявка успешно сформирована и отправлена на анализ",
 	})
 }
+
+// func (h *Handler) FormAnalyseBooks(c *gin.Context) {
+// 	id, err := strconv.Atoi(c.Param("id"))
+// 	if err != nil {
+// 		h.errorHandler(c, http.StatusBadRequest, err)
+// 		return
+// 	}
+
+// 	// 1. Получаем ID текущего пользователя из контекста (КАК У ДРУГА)
+// 	userID, err := getUserIDFromContext(c)
+// 	if err != nil {
+// 		h.errorHandler(c, http.StatusUnauthorized, err)
+// 		return
+// 	}
+
+// 	// 2. Передаем реальный userID вместо hardcodedUserID
+// 	if err := h.Repository.FormAnalyseBooks(uint(id), userID); err != nil {
+// 		h.errorHandler(c, http.StatusBadRequest, err)
+// 		return
+// 	}
+
+// 	c.JSON(http.StatusNoContent, gin.H{
+// 		"message": "Заявка сформирована",
+// 	})
+// }
 
 // PUT /api/analysebooks/:id/resolve - завершить/отклонить заявку
 
@@ -383,4 +457,51 @@ func (h *Handler) UpdateBookToApplication(c *gin.Context) {
 	c.JSON(http.StatusNoContent, gin.H{
 		"message": "Дополнительная информация к книге обновлена",
 	})
+}
+
+// UpdateAnalysisResult godoc
+// @Summary      Принять результаты анализа (Internal)
+// @Description  Служебный метод. Принимает JSON с метриками от Python-сервиса и обновляет БД.
+// @Tags         internal
+// @Param        id   path      int  true  "ID заявки"
+// @Param        X-Secret-Key header string true "Секретный ключ сервиса"
+// @Param        input body ds.AnalyseBooksUpdateRequest true "Результаты анализа"
+// @Success      200  {object}  map[string]string  "Updated"
+// @Failure      400  {object}  map[string]string  "Bad Request"
+// @Failure      403  {object}  map[string]string  "Forbidden"
+// @Router       /analysebookscalc/{id} [put]
+func (h *Handler) UpdateAnalysisResult(c *gin.Context) {
+	// 1. Псевдо-авторизация (проверка ключа)
+	token := c.GetHeader("X-Secret-Key")
+	if token != "secret12" {
+		// Создаем ошибку для errorHandler
+		h.errorHandler(c, http.StatusForbidden, errors.New("invalid secret key"))
+		return
+	}
+
+	// 2. Получаем ID из URL
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+
+	// 3. Парсим JSON с результатами от Python
+	var req ds.AnalyseBooksUpdateRequest
+	if err := c.BindJSON(&req); err != nil {
+		h.errorHandler(c, http.StatusBadRequest, err)
+		return
+	}
+	// --- ДОБАВЬ ЭТО ДЛЯ ОТЛАДКИ ---
+	logrus.Info(req.Status, req.Response)
+	//
+	// 4. Сохраняем метрики в БД
+	// Используем уже написанный тобой метод репозитория
+	if err := h.Repository.UpdateAnalyseBooksUserFields(uint(id), req); err != nil {
+		h.errorHandler(c, http.StatusInternalServerError, err)
+		return
+	}
+
+	// 5. Успешный ответ Python-сервису
+	c.JSON(http.StatusOK, gin.H{"status": "updated"})
 }

@@ -33,7 +33,7 @@ definitions:
         type: number
       moderator_login:
         type: integer
-      responce:
+      response:
         type: string
       status:
         type: integer
@@ -51,11 +51,22 @@ definitions:
       avg_sentence_len:
         type: number
       avg_word_len:
+        description: Новые поля метрик
         type: number
+      completion_date:
+        type: string
       conjunction_freq:
         type: number
+      forming_date:
+        type: string
       lexical_diversity:
         type: number
+      moderator:
+        type: boolean
+      response:
+        type: string
+      status:
+        type: integer
     type: object
   ds.BookCreateRequest:
     properties:
@@ -516,6 +527,49 @@ paths:
       summary: Добавить книгу в черновик заявки (все)
       tags:
       - books
+  /analysebookscalc/{id}:
+    put:
+      description: Служебный метод. Принимает JSON с метриками от Python-сервиса и
+        обновляет БД.
+      parameters:
+      - description: ID заявки
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Секретный ключ сервиса
+        in: header
+        name: X-Secret-Key
+        required: true
+        type: string
+      - description: Результаты анализа
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/ds.AnalyseBooksUpdateRequest'
+      responses:
+        "200":
+          description: Updated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "403":
+          description: Forbidden
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Принять результаты анализа (Internal)
+      tags:
+      - internal
   /auth/login:
     post:
       consumes:

@@ -28,6 +28,7 @@ func NewHandler(r *repository.Repository, redis *redis.Client, jwtConfig *config
 func (h *Handler) RegisterAPI(r *gin.RouterGroup) {
 
 	// Доступны всем
+	r.PUT("/analysebookscalc/:id", h.UpdateAnalysisResult)
 	r.POST("/users", h.Register)
 	r.POST("/auth/login", h.Login)
 	r.GET("/books", h.GetBooks)

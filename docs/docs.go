@@ -497,6 +497,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/analysebookscalc/{id}": {
+            "put": {
+                "description": "Служебный метод. Принимает JSON с метриками от Python-сервиса и обновляет БД.",
+                "tags": [
+                    "internal"
+                ],
+                "summary": "Принять результаты анализа (Internal)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID заявки",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Секретный ключ сервиса",
+                        "name": "X-Secret-Key",
+                        "in": "header",
+                        "required": true
+                    },
+                    {
+                        "description": "Результаты анализа",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ds.AnalyseBooksUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/auth/login": {
             "post": {
                 "description": "Получение JWT токена по логину и паролю для доступа к защищенным эндпоинтам.",
@@ -1132,7 +1195,7 @@ const docTemplate = `{
                 "moderator_login": {
                     "type": "integer"
                 },
-                "responce": {
+                "response": {
                     "type": "string"
                 },
                 "status": {
@@ -1159,13 +1222,29 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "avg_word_len": {
+                    "description": "Новые поля метрик",
                     "type": "number"
+                },
+                "completion_date": {
+                    "type": "string"
                 },
                 "conjunction_freq": {
                     "type": "number"
                 },
+                "forming_date": {
+                    "type": "string"
+                },
                 "lexical_diversity": {
                     "type": "number"
+                },
+                "moderator": {
+                    "type": "boolean"
+                },
+                "response": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
                 }
             }
         },

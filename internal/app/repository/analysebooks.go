@@ -20,7 +20,6 @@ func (r *Repository) GetDraftAnalyseBooks(userID uint) (*ds.AnalyseBooks, error)
 	return &appl, nil
 }
 
-// GET /api/analysebooks/cart - иконка корзины
 // GET /api/analysebooks/:id - одна заявка с услугами
 func (r *Repository) GetAnalyseBooksWithBooks(applID uint) (*ds.AnalyseBooks, error) {
 	var appl ds.AnalyseBooks
@@ -61,7 +60,14 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 
 	if to != "" {
 		if toTime, err := time.Parse("2006-01-02", to); err == nil {
-			query = query.Where("forming_date <= ?", toTime)
+			// ВАЖНОЕ ИСПРАВЛЕНИЕ:
+			// Добавляем 24 часа, чтобы захватить весь день целиком.
+			// Было: 2025-12-04 00:00:00
+			// Стало: 2025-12-05 00:00:00
+			toTime = toTime.Add(24 * time.Hour)
+
+			// Меняем условие на строго меньше (<), чтобы не захватить полночь следующего дня
+			query = query.Where("forming_date < ?", toTime)
 		}
 	}
 
@@ -97,6 +103,15 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 // PUT /api/analysebooks/:id - изменение полей заявки
 func (r *Repository) UpdateAnalyseBooksUserFields(id uint, req ds.AnalyseBooksUpdateRequest) error {
 	updates := make(map[string]interface{})
+	// 1. Обновление СТАТУСА (Python пришлет 4 или 5)
+	if req.Status != nil {
+		updates["status"] = *req.Status
+	}
+
+	// 2. Обновление ДАТ (если нужно)
+	if req.CompletionDate != nil {
+		updates["completion_date"] = *req.CompletionDate
+	}
 
 	if req.AvgWordLen != nil {
 		updates["avg_word_len"] = *req.AvgWordLen
@@ -110,7 +125,10 @@ func (r *Repository) UpdateAnalyseBooksUserFields(id uint, req ds.AnalyseBooksUp
 	if req.AvgSentenceLen != nil {
 		updates["avg_sentence_len"] = *req.AvgSentenceLen
 	}
-
+	// Обязательно добавь это, если хочешь видеть проценты!
+	if req.Response != nil {
+		updates["response"] = *req.Response
+	}
 	// Если нечего обновлять — выходим
 	if len(updates) == 0 {
 		return nil

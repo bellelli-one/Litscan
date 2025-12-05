@@ -79,10 +79,24 @@ type AnalyseBooksUpdateRequest struct {
 	LexicalDiversity *float64 `json:"lexical_diversity"`
 	ConjunctionFreq  *float64 `json:"conjunction_freq"`
 	AvgSentenceLen   *float64 `json:"avg_sentence_len"`
+	Response         *string  `json:"response"`
 }
 
 type AnalyseBooksResolveRequest struct {
 	Action string `json:"action" binding:"required"` // "complete" | "reject"
+}
+
+type BookMetric struct {
+	AvgWordLen       float64 `json:"avg_word_len"`
+	LexicalDiversity float64 `json:"lexical_diversity"`
+	ConjunctionFreq  float64 `json:"conjunction_freq"`
+	AvgSentenceLen   float64 `json:"avg_sentence_len"`
+}
+
+type AsyncRequest struct {
+	ID     uint         `json:"id"`
+	Target BookMetric   `json:"target"`
+	Books  []BookMetric `json:"books"`
 }
 
 type AnalyseBooksBadgeDTO struct {
