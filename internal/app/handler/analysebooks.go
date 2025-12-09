@@ -134,6 +134,7 @@ func (h *Handler) GetAnalyseBooks(c *gin.Context) {
 			ConjunctionFreq:  link.Book.ConjunctionFreq,
 			AvgSentenceLen:   link.Book.AvgSentenceLen,
 			Description:      link.Description,
+			Similarity:       link.Similarity,
 		})
 	}
 
@@ -149,7 +150,6 @@ func (h *Handler) GetAnalyseBooks(c *gin.Context) {
 		LexicalDiversity: app.LexicalDiversity,
 		ConjunctionFreq:  app.ConjunctionFreq,
 		AvgSentenceLen:   app.AvgSentenceLen,
-		Response:         app.Response,
 		Books:            books,
 	}
 
@@ -492,11 +492,6 @@ func (h *Handler) UpdateAnalysisResult(c *gin.Context) {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
-	// --- ДОБАВЬ ЭТО ДЛЯ ОТЛАДКИ ---
-	logrus.Info(req.Status, req.Response)
-	//
-	// 4. Сохраняем метрики в БД
-	// Используем уже написанный тобой метод репозитория
 	if err := h.Repository.UpdateAnalyseBooksUserFields(uint(id), req); err != nil {
 		h.errorHandler(c, http.StatusInternalServerError, err)
 		return

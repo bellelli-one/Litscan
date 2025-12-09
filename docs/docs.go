@@ -1171,6 +1171,10 @@ const docTemplate = `{
                         "$ref": "#/definitions/ds.BookInApplicationDTO"
                     }
                 },
+                "calculated_books": {
+                    "description": "Сколько посчитано (Similarity != nil)",
+                    "type": "integer"
+                },
                 "completion_date": {
                     "type": "string"
                 },
@@ -1195,10 +1199,10 @@ const docTemplate = `{
                 "moderator_login": {
                     "type": "integer"
                 },
-                "response": {
-                    "type": "string"
-                },
                 "status": {
+                    "type": "integer"
+                },
+                "total_books": {
                     "type": "integer"
                 }
             }
@@ -1225,6 +1229,12 @@ const docTemplate = `{
                     "description": "Новые поля метрик",
                     "type": "number"
                 },
+                "book_results": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ds.BookResultDTO"
+                    }
+                },
                 "completion_date": {
                     "type": "string"
                 },
@@ -1239,9 +1249,6 @@ const docTemplate = `{
                 },
                 "moderator": {
                     "type": "boolean"
-                },
-                "response": {
-                    "type": "string"
                 },
                 "status": {
                     "type": "integer"
@@ -1334,11 +1341,25 @@ const docTemplate = `{
                 "lexical_diversity": {
                     "type": "number"
                 },
+                "similarity": {
+                    "type": "number"
+                },
                 "text": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "ds.BookResultDTO": {
+            "type": "object",
+            "properties": {
+                "book_id": {
+                    "type": "integer"
+                },
+                "similarity": {
+                    "type": "number"
                 }
             }
         },

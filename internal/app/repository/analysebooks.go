@@ -38,8 +38,11 @@ func (r *Repository) GetAnalyseBooksWithBooks(applID uint) (*ds.AnalyseBooks, er
 // GET /api/analysebooks - список заявок с фильтрацией
 func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, status, from, to string) ([]ds.AnalyseBooksDTO, error) {
 	var appList []ds.AnalyseBooks
-	query := r.db.Preload("Creator").Preload("Moderator")
 
+	// 1. ВАЖНО: Добавил Preload("BooksLink"), чтобы мы могли посчитать прогресс
+	query := r.db.Preload("Creator").Preload("Moderator").Preload("BooksLink")
+
+	// Фильтры остаются как были
 	query = query.Where("status != ? AND status != ?", ds.StatusDeleted, ds.StatusDraft)
 
 	if !isModerator {
@@ -60,16 +63,13 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 
 	if to != "" {
 		if toTime, err := time.Parse("2006-01-02", to); err == nil {
-			// ВАЖНОЕ ИСПРАВЛЕНИЕ:
-			// Добавляем 24 часа, чтобы захватить весь день целиком.
-			// Было: 2025-12-04 00:00:00
-			// Стало: 2025-12-05 00:00:00
 			toTime = toTime.Add(24 * time.Hour)
-
-			// Меняем условие на строго меньше (<), чтобы не захватить полночь следующего дня
 			query = query.Where("forming_date < ?", toTime)
 		}
 	}
+
+	// Сортировка по убыванию ID (новые сверху) - это удобно
+	query = query.Order("id desc")
 
 	if err := query.Find(&appList).Error; err != nil {
 		return nil, err
@@ -77,6 +77,18 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 
 	var result []ds.AnalyseBooksDTO
 	for _, app := range appList {
+
+		// 2. ВАЖНО: Считаем прогресс (сколько книг обработано)
+		calculatedCount := 0
+		totalCount := len(app.BooksLink)
+
+		for _, link := range app.BooksLink {
+			// Если Similarity не nil, значит Python уже посчитал эту книгу
+			if link.Similarity != nil {
+				calculatedCount++
+			}
+		}
+
 		dto := ds.AnalyseBooksDTO{
 			ID:               app.ID,
 			Status:           app.Status,
@@ -89,7 +101,10 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 			LexicalDiversity: app.LexicalDiversity,
 			ConjunctionFreq:  app.ConjunctionFreq,
 			AvgSentenceLen:   app.AvgSentenceLen,
-			Response:         app.Response,
+
+			// 3. ВАЖНО: Заполняем новые поля// Общий результат
+			CalculatedBooks: calculatedCount, // Например 2
+			TotalBooks:      totalCount,      // Например 5
 		}
 
 		if app.ModeratorID != nil {
@@ -101,18 +116,26 @@ func (r *Repository) AnalyseBooksListFiltered(userID uint, isModerator bool, sta
 }
 
 // PUT /api/analysebooks/:id - изменение полей заявки
+// PUT /api/analysebooks/:id - изменение полей заявки
 func (r *Repository) UpdateAnalyseBooksUserFields(id uint, req ds.AnalyseBooksUpdateRequest) error {
+	// 1. Начинаем транзакцию
+	// Это нужно, чтобы обновление двух таблиц произошло одновременно или не произошло вообще
+	tx := r.db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// --- БЛОК 1: Обновление самой заявки (Твой старый код) ---
 	updates := make(map[string]interface{})
-	// 1. Обновление СТАТУСА (Python пришлет 4 или 5)
+
 	if req.Status != nil {
 		updates["status"] = *req.Status
 	}
-
-	// 2. Обновление ДАТ (если нужно)
 	if req.CompletionDate != nil {
 		updates["completion_date"] = *req.CompletionDate
 	}
-
 	if req.AvgWordLen != nil {
 		updates["avg_word_len"] = *req.AvgWordLen
 	}
@@ -125,16 +148,34 @@ func (r *Repository) UpdateAnalyseBooksUserFields(id uint, req ds.AnalyseBooksUp
 	if req.AvgSentenceLen != nil {
 		updates["avg_sentence_len"] = *req.AvgSentenceLen
 	}
-	// Обязательно добавь это, если хочешь видеть проценты!
-	if req.Response != nil {
-		updates["response"] = *req.Response
-	}
-	// Если нечего обновлять — выходим
-	if len(updates) == 0 {
-		return nil
+
+	// Выполняем обновление главной таблицы ВНУТРИ транзакции (tx)
+	if len(updates) > 0 {
+		if err := tx.Model(&ds.AnalyseBooks{}).Where("id = ?", id).Updates(updates).Error; err != nil {
+			tx.Rollback() // Если ошибка — отменяем всё
+			return err
+		}
 	}
 
-	return r.db.Model(&ds.AnalyseBooks{}).Where("id = ?", id).Updates(updates).Error
+	// --- БЛОК 2: Обновление каждой книги (Новый код) ---
+	// Проверяем, прислал ли Python результаты по книгам
+	if len(req.BookResults) > 0 {
+		for _, res := range req.BookResults {
+			// Обновляем поле similarity в таблице связей (book_to_appl)
+			// Ищем запись, где совпадают ID заявки и ID книги
+			err := tx.Model(&ds.BookToAppl{}).
+				Where("appl_id = ? AND book_id = ?", id, res.BookID).
+				Update("similarity", res.Similarity).Error
+
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
+
+	// 3. Если всё прошло успешно — сохраняем изменения
+	return tx.Commit().Error
 }
 
 // PUT /api/analysebooks/:id/form - сформировать заявку
@@ -185,7 +226,7 @@ func (r *Repository) ResolveAnalyseBooks(id uint, moderatorID uint, action strin
 		now := time.Now()
 		updates := map[string]interface{}{
 			"moderator_id":    moderatorID,
-			"complition_date": now,
+			"completion_date": now,
 		}
 
 		switch action {

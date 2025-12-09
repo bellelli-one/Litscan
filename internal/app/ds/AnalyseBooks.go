@@ -17,8 +17,6 @@ type AnalyseBooks struct {
 	ConjunctionFreq  float64 `gorm:"column:conjunction_freq;type:numeric(10, 3)"`
 	AvgSentenceLen   float64 `gorm:"column:avg_sentence_len;type:numeric(10, 2)"`
 
-	Response *string `gorm:"column:response;type:text"`
-
 	// --- СВЯЗИ ---
 	// Отношение "принадлежит к": каждая заявка принадлежит одному пользователю.
 	Creator   Users  `gorm:"foreignKey:CreatorID"`

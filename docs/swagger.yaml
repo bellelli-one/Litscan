@@ -17,6 +17,9 @@ definitions:
         items:
           $ref: '#/definitions/ds.BookInApplicationDTO'
         type: array
+      calculated_books:
+        description: Сколько посчитано (Similarity != nil)
+        type: integer
       completion_date:
         type: string
       conjunction_freq:
@@ -33,9 +36,9 @@ definitions:
         type: number
       moderator_login:
         type: integer
-      response:
-        type: string
       status:
+        type: integer
+      total_books:
         type: integer
     type: object
   ds.AnalyseBooksResolveRequest:
@@ -53,6 +56,10 @@ definitions:
       avg_word_len:
         description: Новые поля метрик
         type: number
+      book_results:
+        items:
+          $ref: '#/definitions/ds.BookResultDTO'
+        type: array
       completion_date:
         type: string
       conjunction_freq:
@@ -63,8 +70,6 @@ definitions:
         type: number
       moderator:
         type: boolean
-      response:
-        type: string
       status:
         type: integer
     type: object
@@ -125,10 +130,19 @@ definitions:
         type: string
       lexical_diversity:
         type: number
+      similarity:
+        type: number
       text:
         type: string
       title:
         type: string
+    type: object
+  ds.BookResultDTO:
+    properties:
+      book_id:
+        type: integer
+      similarity:
+        type: number
     type: object
   ds.BookToApplicationUpdateRequest:
     properties:

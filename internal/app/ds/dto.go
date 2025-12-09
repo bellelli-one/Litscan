@@ -47,20 +47,22 @@ type AnalyseBooksDTO struct {
 	LexicalDiversity float64                `json:"lexical_diversity"`
 	ConjunctionFreq  float64                `json:"conjunction_freq"`
 	AvgSentenceLen   float64                `json:"avg_sentence_len"`
-	Response         *string                `json:"response"`
+	CalculatedBooks  int                    `json:"calculated_books"` // Сколько посчитано (Similarity != nil)
+	TotalBooks       int                    `json:"total_books"`
 	Books            []BookInApplicationDTO `json:"books,omitempty"`
 }
 
 type BookInApplicationDTO struct {
-	BookID           uint    `json:"book_id"`
-	Title            string  `json:"title"`
-	Text             string  `json:"text"`
-	Image            *string `json:"image"`
-	AvgWordLen       float64 `json:"avg_word_len"`
-	LexicalDiversity float64 `json:"lexical_diversity"`
-	ConjunctionFreq  float64 `json:"conjunction_freq"`
-	AvgSentenceLen   float64 `json:"avg_sentence_len"`
-	Description      *string `json:"description"`
+	BookID           uint     `json:"book_id"`
+	Title            string   `json:"title"`
+	Text             string   `json:"text"`
+	Image            *string  `json:"image"`
+	AvgWordLen       float64  `json:"avg_word_len"`
+	LexicalDiversity float64  `json:"lexical_diversity"`
+	ConjunctionFreq  float64  `json:"conjunction_freq"`
+	AvgSentenceLen   float64  `json:"avg_sentence_len"`
+	Description      *string  `json:"description"`
+	Similarity       *float64 `json:"similarity"`
 }
 
 type BookToApplicationUpdateRequest struct {
@@ -75,11 +77,11 @@ type AnalyseBooksUpdateRequest struct {
 	Moderator      *bool      `json:"moderator"`
 
 	// Новые поля метрик
-	AvgWordLen       *float64 `json:"avg_word_len"`
-	LexicalDiversity *float64 `json:"lexical_diversity"`
-	ConjunctionFreq  *float64 `json:"conjunction_freq"`
-	AvgSentenceLen   *float64 `json:"avg_sentence_len"`
-	Response         *string  `json:"response"`
+	AvgWordLen       *float64        `json:"avg_word_len"`
+	LexicalDiversity *float64        `json:"lexical_diversity"`
+	ConjunctionFreq  *float64        `json:"conjunction_freq"`
+	AvgSentenceLen   *float64        `json:"avg_sentence_len"`
+	BookResults      []BookResultDTO `json:"book_results"`
 }
 
 type AnalyseBooksResolveRequest struct {
@@ -136,4 +138,9 @@ type LoginResponse struct {
 type PaginatedResponse struct {
 	Items interface{} `json:"items"`
 	Total int64       `json:"total"`
+}
+
+type BookResultDTO struct {
+	BookID     uint    `json:"book_id"`
+	Similarity float64 `json:"similarity"`
 }
