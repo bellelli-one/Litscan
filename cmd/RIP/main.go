@@ -40,8 +40,8 @@ func main() {
 			return origin == "https://localhost:3000" ||
 				origin == "tauri://localhost" ||
 				origin == "https://tauri.localhost" ||
-				origin == "https://192.168.1.151:3000" ||
-				origin == "http://192.168.1.151:3000" ||
+				origin == "https://192.168.74.1:3000" ||
+				origin == "http://192.168.74.1:3000" ||
 				origin == "https://bellelli-one.github.io"
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},

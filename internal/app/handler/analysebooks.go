@@ -471,22 +471,17 @@ func (h *Handler) UpdateBookToApplication(c *gin.Context) {
 // @Failure      403  {object}  map[string]string  "Forbidden"
 // @Router       /analysebookscalc/{id} [put]
 func (h *Handler) UpdateAnalysisResult(c *gin.Context) {
-	// 1. Псевдо-авторизация (проверка ключа)
 	token := c.GetHeader("X-Secret-Key")
 	if token != "secret12" {
-		// Создаем ошибку для errorHandler
 		h.errorHandler(c, http.StatusForbidden, errors.New("invalid secret key"))
 		return
 	}
-
-	// 2. Получаем ID из URL
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
 		return
 	}
 
-	// 3. Парсим JSON с результатами от Python
 	var req ds.AnalyseBooksUpdateRequest
 	if err := c.BindJSON(&req); err != nil {
 		h.errorHandler(c, http.StatusBadRequest, err)
@@ -497,6 +492,5 @@ func (h *Handler) UpdateAnalysisResult(c *gin.Context) {
 		return
 	}
 
-	// 5. Успешный ответ Python-сервису
 	c.JSON(http.StatusOK, gin.H{"status": "updated"})
 }
